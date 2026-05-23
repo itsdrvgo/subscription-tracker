@@ -1,8 +1,8 @@
+import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { Icons } from "../icons";
 import { Button } from "./button";
 import { Input } from "./input";
-import { Icons } from "../icons";
-import { cn } from "@/lib/utils";
 
 interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     showToggle?: boolean;

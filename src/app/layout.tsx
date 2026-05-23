@@ -3,6 +3,7 @@ import "./globals.css";
 import { ClientProvider } from "@/components/providers";
 import { siteConfig } from "@/config/site";
 import { cn, getAbsoluteURL } from "@/lib/utils";
+import { ThemeProvider } from "@wrksz/themes/next";
 import { interHeading, outfit } from "./font";
 
 export const viewport: Viewport = {
@@ -86,9 +87,12 @@ export default function RootLayout({
                 outfit.variable,
                 interHeading.variable
             )}
+            suppressHydrationWarning
         >
             <body className="flex min-h-full flex-col">
-                <ClientProvider>{children}</ClientProvider>
+                <ThemeProvider attribute="class" defaultTheme="dark">
+                    <ClientProvider>{children}</ClientProvider>
+                </ThemeProvider>
             </body>
         </html>
     );

@@ -2,7 +2,6 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { useState } from "react";
 import { Toaster } from "sonner";
@@ -14,10 +13,8 @@ export function ClientProvider({ children }: RootLayoutProps) {
     return (
         <QueryClientProvider client={queryClient}>
             <NuqsAdapter>
-                <NextThemesProvider attribute="class" defaultTheme="dark">
-                    <TooltipProvider>{children}</TooltipProvider>
-                    <Toaster richColors />
-                </NextThemesProvider>
+                <TooltipProvider>{children}</TooltipProvider>
+                <Toaster richColors />
             </NuqsAdapter>
 
             <ReactQueryDevtools />

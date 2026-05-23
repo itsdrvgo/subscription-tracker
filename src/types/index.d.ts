@@ -1,7 +1,7 @@
-import { ZodType } from "zod";
-import { HTMLAttributes, ReactNode } from "react";
 import { Icons } from "@/components/icons";
 import { SafeUser } from "@/lib/validations";
+import { HTMLAttributes, ReactNode } from "react";
+import { ZodType } from "zod";
 
 declare global {
     type GenericProps = HTMLAttributes<HTMLElement>;

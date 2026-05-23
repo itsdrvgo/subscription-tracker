@@ -19,9 +19,9 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 import { useState, type ComponentType } from "react";
 import { useDataTable } from "./data-table";
-import { ChevronDown } from "lucide-react";
 
 export interface BulkAction<TData> {
     label: string;

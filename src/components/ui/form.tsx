@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@workspace/config";
+import { cn } from "@/lib/utils";
 import type { Label as LabelPrimitive } from "radix-ui";
 import { Slot } from "radix-ui";
 import * as React from "react";

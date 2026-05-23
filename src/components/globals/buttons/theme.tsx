@@ -2,7 +2,7 @@
 
 import { Icons } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { useTheme } from "next-themes";
+import { useTheme } from "@wrksz/themes/client";
 import { ButtonHTMLAttributes } from "react";
 
 export function ThemeButton({

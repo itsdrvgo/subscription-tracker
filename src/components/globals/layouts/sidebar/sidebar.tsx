@@ -1,5 +1,6 @@
 "use client";
 
+import { Icons } from "@/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     Collapsible,
@@ -23,15 +24,14 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn, getAbsoluteURL } from "@/lib/utils";
+import { DEFAULT_PFP_URL } from "@/config/const";
 import { siteConfig } from "@/config/site";
 import { useAuth } from "@/lib/rq";
+import { cn, getAbsoluteURL } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { Icons } from "@/components/icons";
-import { DEFAULT_PFP_URL } from "@/config/const";
 
 export function Sidebar() {
     const pathname = usePathname();
@@ -71,7 +71,7 @@ function Header() {
                         <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
                             <Image
                                 src="/icon1.png"
-                                alt="AIA Logo"
+                                alt="Logo"
                                 width={35}
                                 height={35}
                             />

@@ -51,6 +51,8 @@ const eslintConfig = defineConfig([
         "out/**",
         "build/**",
         "next-env.d.ts",
+        // Monorepo-style reference snippets kept as docs, not built.
+        "src/reference/**",
     ]),
 ]);
 

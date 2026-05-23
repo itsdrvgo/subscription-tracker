@@ -8,14 +8,17 @@
         "start": "next start",
         "lint": "eslint",
         "format": "prettier --write .",
-        "db:mig": "drizzle-kit generate && drizzle-kit push"
+        "db:mig": "drizzle-kit generate && drizzle-kit push",
+        "email:dev": "email dev --dir src/lib/email/preview --port 3001"
     },
     "dependencies": {
         "@base-ui/react": "^1.5.0",
         "@hookform/resolvers": "^5.4.0",
+        "@react-email/render": "^2.0.8",
         "@t3-oss/env-nextjs": "^0.13.11",
         "@tanstack/react-query": "^5.100.13",
         "@tanstack/react-table": "^8.21.3",
+        "@wrksz/themes": "^0.9.3",
         "bcryptjs": "^3.0.3",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
@@ -29,7 +32,6 @@
         "lucide-react": "^1.16.0",
         "motion": "^12.40.0",
         "next": "16.2.4",
-        "next-themes": "^0.4.6",
         "nuqs": "^2.8.9",
         "papaparse": "^5.5.3",
         "postgres": "^3.4.9",
@@ -48,6 +50,7 @@
     },
     "devDependencies": {
         "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
+        "@react-email/ui": "6.3.2",
         "@tailwindcss/postcss": "^4.3.0",
         "@tanstack/react-query-devtools": "^5.100.13",
         "@types/node": "^20.19.41",
@@ -61,6 +64,7 @@
         "eslint-plugin-unused-imports": "^4.4.1",
         "prettier": "^3.8.3",
         "prettier-plugin-tailwindcss": "^0.8.0",
+        "react-email": "6.3.2",
         "tailwindcss": "^4.3.0",
         "typescript": "^6.0.3"
     },

@@ -1,12 +1,12 @@
-import { eq } from "drizzle-orm";
-import { db } from "../client";
-import { users } from "../schemas";
 import {
     SafeUser,
     safeUserSchema,
     UpdateProfile,
     User,
 } from "@/lib/validations";
+import { eq } from "drizzle-orm";
+import { db } from "../client";
+import { users } from "../schemas";
 
 class UserQuery {
     async get({
@@ -91,6 +91,14 @@ class UserQuery {
             .then((res) => res[0]);
 
         return data;
+    }
+
+    async scanByIds({ ids }: { ids: string[] }): Promise<SafeUser[]> {
+        if (!ids.length) return [];
+        const data = await db.query.users.findMany({
+            where: { id: { in: ids } },
+        });
+        return safeUserSchema.array().parse(data);
     }
 }
 

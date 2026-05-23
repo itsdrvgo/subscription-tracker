@@ -17,32 +17,51 @@ export const siteConfig: SiteConfig = {
     contact: "thedragoluca@gmail.com",
     sidebar: [
         {
-            title: "Getting Started",
-            url: "/getting-started",
-            icon: "House",
+            title: "Overview",
+            url: "/dashboard",
+            icon: "LayoutDashboard",
             items: [
                 {
-                    title: "Installation",
-                    url: "/getting-started/installation",
+                    title: "Dashboard",
+                    url: "/dashboard",
                 },
                 {
-                    title: "Quick Start Guide",
-                    url: "/getting-started/quick-start",
+                    title: "Activity",
+                    url: "/dashboard/activity",
                 },
             ],
         },
         {
-            title: "Features",
-            url: "/features",
-            icon: "House",
+            title: "Subscriptions",
+            url: "/subscriptions",
+            icon: "Receipt",
             items: [
                 {
-                    title: "Post Scheduler",
-                    url: "/features/post-scheduler",
+                    title: "All subscriptions",
+                    url: "/subscriptions",
                 },
                 {
-                    title: "Comment Manager",
-                    url: "/features/comment-manager",
+                    title: "Add subscription",
+                    url: "/subscriptions/create",
+                },
+                {
+                    title: "Categories",
+                    url: "/subscriptions/categories",
+                },
+            ],
+        },
+        {
+            title: "Billing",
+            url: "/billing",
+            icon: "Wallet",
+            items: [
+                {
+                    title: "Payment sources",
+                    url: "/billing/payment-sources",
+                },
+                {
+                    title: "Budget",
+                    url: "/billing/budget",
                 },
             ],
         },

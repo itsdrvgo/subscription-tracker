@@ -3,10 +3,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { X } from "lucide-react";
 import { Fragment, useEffect, useState, type ReactNode } from "react";
 import { useDataTable } from "./data-table";
 import { DataTableViewOptions } from "./view-options";
-import { X } from "lucide-react";
 
 interface DataTableToolbarProps {
     searchPlaceholder?: string;

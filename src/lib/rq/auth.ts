@@ -1,8 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { cFetch, handleClientError } from "@/lib/utils";
 import {
     SafeUser,
     SignIn,
@@ -10,7 +8,9 @@ import {
     UpdatePassword,
     UpdateProfile,
 } from "@/lib/validations";
-import { cFetch, handleClientError } from "@/lib/utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function useAuth() {
     const router = useRouter();
@@ -71,7 +71,7 @@ export function useAuth() {
             },
             onSuccess: async (_, __, { toastId }) => {
                 toast.success("See you next time!", { id: toastId });
-                router.push("/signin");
+                router.push("/auth/signin");
             },
             onError: handleClientError,
         });

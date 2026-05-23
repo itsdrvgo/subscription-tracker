@@ -10,10 +10,10 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {
-    ChevronLeft,
-    ChevronRight,
     ChevronFirst,
     ChevronLast,
+    ChevronLeft,
+    ChevronRight,
 } from "lucide-react";
 import { useDataTable } from "./data-table";
 

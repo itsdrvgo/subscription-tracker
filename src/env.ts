@@ -9,6 +9,13 @@ export const env = createEnv({
         JWT_SECRET: z
             .string()
             .min(32, "JWT_SECRET must be at least 32 characters"),
+
+        RESEND_API_KEY: z.string().optional(),
+        EMAIL_FROM: z
+            .string()
+            .optional()
+            .default("Subscription Tracker Dev <onboarding@resend.dev>"),
+        CRON_SECRET: z.string().optional(),
     },
     client: {
         NEXT_PUBLIC_DEPLOYMENT_URL: z
@@ -20,6 +27,10 @@ export const env = createEnv({
         REDIS_URL: process.env.REDIS_URL,
 
         JWT_SECRET: process.env.JWT_SECRET,
+
+        RESEND_API_KEY: process.env.RESEND_API_KEY,
+        EMAIL_FROM: process.env.EMAIL_FROM,
+        CRON_SECRET: process.env.CRON_SECRET,
 
         NEXT_PUBLIC_DEPLOYMENT_URL: process.env.NEXT_PUBLIC_DEPLOYMENT_URL,
     },
