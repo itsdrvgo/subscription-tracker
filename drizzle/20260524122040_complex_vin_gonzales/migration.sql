@@ -1,0 +1,1 @@
+ALTER TABLE "subscriptions" ADD COLUMN "trial_price" numeric(12,2);

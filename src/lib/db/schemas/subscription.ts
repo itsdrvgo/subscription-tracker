@@ -26,6 +26,7 @@ export const PAYMENT_SOURCE_TYPES = [
     "play_store",
     "app_store",
     "credit_card",
+    "upi_credit_card",
     "debit_card",
     "paypal",
     "upi",
@@ -153,6 +154,7 @@ export const subscriptions = pgTable(
             .notNull(),
         customIntervalDays: t.integer("custom_interval_days"),
         price: t.numeric("price", { precision: 12, scale: 2 }).notNull(),
+        trialPrice: t.numeric("trial_price", { precision: 12, scale: 2 }),
         yearlyPrice: t.numeric("yearly_price", { precision: 12, scale: 2 }),
         currency: t.text("currency").notNull().default("USD"),
         taxAmount: t

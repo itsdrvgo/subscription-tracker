@@ -54,14 +54,13 @@ export function UpcomingRenewals({ items, isLoading }: PageProps) {
                                     )}
                                 </div>
                                 <p className="text-xs text-muted-foreground">
-                                    {s.nextRenewalDate.toLocaleDateString(
-                                        "en-US",
-                                        {
-                                            month: "short",
-                                            day: "numeric",
-                                            year: "numeric",
-                                        }
-                                    )}
+                                    {new Date(
+                                        s.nextRenewalDate
+                                    ).toLocaleDateString("en-US", {
+                                        month: "short",
+                                        day: "numeric",
+                                        year: "numeric",
+                                    })}
                                 </p>
                             </div>
 

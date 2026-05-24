@@ -50,7 +50,7 @@ export function PaymentSourceManager() {
     const { data, isPending } = useScan({});
 
     return (
-        <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
+        <div className="grid items-start gap-6 lg:grid-cols-[1fr_2fr]">
             <Card>
                 <CardHeader>
                     <CardTitle>

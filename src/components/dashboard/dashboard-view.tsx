@@ -24,46 +24,45 @@ export function DashboardView() {
                 currency={currency}
             />
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <div className="space-y-6 lg:col-span-2">
+            {/*
+              Two independent vertical stacks instead of a row-based grid.
+              Each column lets its cards keep their natural height, so a
+              short card next to a tall one doesn't leave a yawning gap.
+            */}
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+                <div className="flex flex-1 flex-col gap-6 lg:basis-2/3">
                     <SpendingTrendChart
                         trend={data?.stats.monthlyTrend}
                         isLoading={isPending}
                         currency={currency}
-                    />
-
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <UpcomingRenewals
-                            items={data?.upcoming}
-                            isLoading={isPending}
-                        />
-                        <TrialsEnding
-                            items={data?.trialsEnding}
-                            isLoading={isPending}
-                        />
-                    </div>
-                </div>
-
-                <div className="space-y-6">
-                    <BudgetCard
-                        budget={data?.stats.budget ?? null}
-                        isLoading={isPending}
                     />
                     <CategoryBreakdown
                         breakdown={data?.stats.spendByCategory}
                         isLoading={isPending}
                         currency={currency}
                     />
+                    <SpendByPaymentSource
+                        sources={data?.stats.spendByPaymentSource}
+                        isLoading={isPending}
+                        currency={currency}
+                    />
                 </div>
-            </div>
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <SpendByPaymentSource
-                    sources={data?.stats.spendByPaymentSource}
-                    isLoading={isPending}
-                    currency={currency}
-                />
-                <ActivityFeed items={data?.activity} isLoading={isPending} />
+                <div className="flex flex-1 flex-col gap-6 lg:basis-1/3">
+                    <BudgetCard
+                        budget={data?.stats.budget ?? null}
+                        isLoading={isPending}
+                    />
+                    <UpcomingRenewals
+                        items={data?.upcoming}
+                        isLoading={isPending}
+                    />
+                    <TrialsEnding
+                        items={data?.trialsEnding}
+                        isLoading={isPending}
+                    />
+                    <ActivityFeed items={data?.activity} isLoading={isPending} />
+                </div>
             </div>
         </div>
     );

@@ -14,6 +14,7 @@ const sampleSubscription: FullSubscription = {
     billingCycle: "monthly",
     customIntervalDays: null,
     price: "20.00",
+    trialPrice: "0",
     yearlyPrice: null,
     currency: "USD",
     taxAmount: "0",

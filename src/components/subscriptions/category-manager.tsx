@@ -35,11 +35,12 @@ import { useForm } from "react-hook-form";
 
 export function CategoryManager() {
     const [editing, setEditing] = useState<SubscriptionCategory | null>(null);
+
     const { useScan } = useSubscriptionCategory();
     const { data, isPending } = useScan({});
 
     return (
-        <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
+        <div className="grid items-start gap-6 lg:grid-cols-[1fr_2fr]">
             <Card>
                 <CardHeader>
                     <CardTitle>
@@ -112,7 +113,12 @@ function CategoryForm({
         if (isEdit && editing) {
             await updateCategory({ id: editing.id, values });
         } else {
-            await createCategory([values]);
+            await createCategory([
+                {
+                    ...values,
+                    slug: slugify(values.name),
+                },
+            ]);
         }
         form.reset({ name: "", slug: "", color: null, icon: null });
         onFinish();
@@ -137,14 +143,14 @@ function CategoryForm({
                                     disabled={isSubmitting}
                                     onChange={(e) => {
                                         field.onChange(e);
-                                        if (
-                                            !isEdit &&
-                                            !form.getFieldState("slug").isDirty
-                                        ) {
+                                        if (!isEdit) {
                                             form.setValue(
                                                 "slug",
                                                 slugify(e.target.value),
-                                                { shouldValidate: false }
+                                                {
+                                                    shouldValidate: false,
+                                                    shouldDirty: false,
+                                                }
                                             );
                                         }
                                     }}

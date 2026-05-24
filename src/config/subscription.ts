@@ -58,6 +58,7 @@ export const PAYMENT_SOURCE_TYPE_LABELS: Record<
     play_store: "Play Store",
     app_store: "App Store",
     credit_card: "Credit Card",
+    upi_credit_card: "UPI Credit Card",
     debit_card: "Debit Card",
     paypal: "PayPal",
     upi: "UPI",

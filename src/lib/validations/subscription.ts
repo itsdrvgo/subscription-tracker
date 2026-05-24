@@ -183,6 +183,7 @@ export const subscriptionSchema = z.object({
         .nullable()
         .optional(),
     price: numericString,
+    trialPrice: optionalNumericString,
     yearlyPrice: optionalNumericString,
     currency: z.string().min(1).default("USD"),
     taxAmount: numericString.default("0"),

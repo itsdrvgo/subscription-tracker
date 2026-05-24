@@ -1,5 +1,6 @@
+import { buildCurrencyConverter } from "@/lib/currency/exchange";
 import { parseNumeric } from "@/lib/subscription";
-import { SubscriptionStats } from "@/lib/validations";
+import { FullSubscription, SubscriptionStats } from "@/lib/validations";
 import { addDays, subMonths } from "date-fns";
 import { queries } from "./index";
 import {
@@ -32,6 +33,9 @@ class AnalyticsQuery {
             queries.budget.get({ userId }),
         ]);
 
+        const targetCurrency = budget?.currency ?? "USD";
+        const convert = await buildCurrencyConverter(targetCurrency);
+
         const now = new Date();
         const in7 = addDays(now, 7);
         const in30 = addDays(now, 30);
@@ -49,12 +53,28 @@ class AnalyticsQuery {
             (s) => s.status === "cancelled"
         ).length;
 
-        const monthlySpend = active.reduce(
-            (sum, s) => sum + computeMonthlyCostForSubscription(s),
+        // Convert each subscription's native-currency monthly cost to the
+        // budget/target currency so aggregates are comparable across currencies.
+        const monthlyByActive = await Promise.all(
+            active.map(async (s) => ({
+                sub: s,
+                monthly: await convert(
+                    computeMonthlyCostForSubscription(s, now),
+                    s.currency
+                ),
+                yearly: await convert(
+                    computeYearlyCostForSubscription(s, now),
+                    s.currency
+                ),
+            }))
+        );
+
+        const monthlySpend = monthlyByActive.reduce(
+            (sum, x) => sum + x.monthly,
             0
         );
-        const yearlySpend = active.reduce(
-            (sum, s) => sum + computeYearlyCostForSubscription(s),
+        const yearlySpend = monthlyByActive.reduce(
+            (sum, x) => sum + x.yearly,
             0
         );
 
@@ -78,33 +98,32 @@ class AnalyticsQuery {
             ? monthlySpend / active.length
             : 0;
 
-        const highestCostSubscription = active.length
-            ? (active
-                  .map((s) => ({
-                      id: s.id,
-                      name: s.name,
-                      monthlyCost: computeMonthlyCostForSubscription(s),
+        const highestCostSubscription = monthlyByActive.length
+            ? (monthlyByActive
+                  .map((x) => ({
+                      id: x.sub.id,
+                      name: x.sub.name,
+                      monthlyCost: x.monthly,
                   }))
                   .sort((a, b) => b.monthlyCost - a.monthlyCost)[0] ?? null)
             : null;
 
-        // Spend by category
+        // Spend by category — values are already in budget currency.
         const byCategoryMap = new Map<
             string | "none",
             { categoryName: string; monthlyCost: number; count: number }
         >();
-        active.forEach((s) => {
+        monthlyByActive.forEach(({ sub: s, monthly }) => {
             const key = s.categoryId ?? "none";
             const name = s.category?.name ?? "Uncategorized";
-            const cost = computeMonthlyCostForSubscription(s);
             const existing = byCategoryMap.get(key);
             if (existing) {
-                existing.monthlyCost += cost;
+                existing.monthlyCost += monthly;
                 existing.count += 1;
             } else {
                 byCategoryMap.set(key, {
                     categoryName: name,
-                    monthlyCost: cost,
+                    monthlyCost: monthly,
                     count: 1,
                 });
             }
@@ -119,23 +138,22 @@ class AnalyticsQuery {
             }))
             .sort((a, b) => b.monthlyCost - a.monthlyCost);
 
-        // Spend by payment source
+        // Spend by payment source — also in budget currency.
         const bySourceMap = new Map<
             string | "none",
             { paymentSourceName: string; monthlyCost: number; count: number }
         >();
-        active.forEach((s) => {
+        monthlyByActive.forEach(({ sub: s, monthly }) => {
             const key = s.paymentSourceId ?? "none";
             const name = s.paymentSource?.name ?? "Unspecified";
-            const cost = computeMonthlyCostForSubscription(s);
             const existing = bySourceMap.get(key);
             if (existing) {
-                existing.monthlyCost += cost;
+                existing.monthlyCost += monthly;
                 existing.count += 1;
             } else {
                 bySourceMap.set(key, {
                     paymentSourceName: name,
-                    monthlyCost: cost,
+                    monthlyCost: monthly,
                     count: 1,
                 });
             }
@@ -150,16 +168,13 @@ class AnalyticsQuery {
             }))
             .sort((a, b) => b.monthlyCost - a.monthlyCost);
 
-        // Monthly trend: for each of last 6 months, sum monthly cost of subs
-        // that were active during that month (startDate <= end of month AND
-        // (cancelledAt is null OR cancelledAt >= start of month) AND status
-        // not in expired/pending).
+        // Monthly trend over the last 6 months, also converted.
         const monthlyTrend: SubscriptionStats["monthlyTrend"] = [];
         for (let i = 5; i >= 0; i--) {
             const month = subMonths(now, i);
             const start = startOfMonth(month);
             const end = endOfMonth(month);
-            const eligible = subs.filter((s) => {
+            const eligible = subs.filter((s: FullSubscription) => {
                 const startedBeforeEnd = s.startDate <= end;
                 const stillActiveInMonth =
                     !s.cancelledAt || s.cancelledAt >= start;
@@ -169,10 +184,15 @@ class AnalyticsQuery {
                     s.status !== "inactive";
                 return startedBeforeEnd && stillActiveInMonth && validStatus;
             });
-            const spend = eligible.reduce(
-                (sum, s) => sum + computeMonthlyCostForSubscription(s),
-                0
+            const converted = await Promise.all(
+                eligible.map((s) =>
+                    convert(
+                        computeMonthlyCostForSubscription(s, end),
+                        s.currency
+                    )
+                )
             );
+            const spend = converted.reduce((sum, n) => sum + n, 0);
             monthlyTrend.push({ month: format(month), spend });
         }
 

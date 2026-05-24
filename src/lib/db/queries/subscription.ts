@@ -505,18 +505,49 @@ class SubscriptionQuery {
 
 export const subscriptionQueries = new SubscriptionQuery();
 
-export function computeMonthlyCostForSubscription(
+type CostSub = Pick<
+    Subscription,
+    | "price"
+    | "trialPrice"
+    | "billingCycle"
+    | "customIntervalDays"
+    | "taxAmount"
+    | "discountAmount"
+    | "isTrial"
+    | "trialEndDate"
+    | "status"
+>;
+
+/**
+ * Returns the price that applies right now. During an unexpired trial we use
+ * trialPrice (falling back to 0 when null, i.e. free trial). Once the trial
+ * window has passed — or there is no trial — we use the regular price.
+ */
+export function getEffectivePrice(
     s: Pick<
         Subscription,
-        | "price"
-        | "billingCycle"
-        | "customIntervalDays"
-        | "taxAmount"
-        | "discountAmount"
-    >
+        "price" | "trialPrice" | "isTrial" | "trialEndDate" | "status"
+    >,
+    now: Date = new Date()
+): number {
+    const inTrial =
+        s.isTrial &&
+        s.status !== "expired" &&
+        (!s.trialEndDate || s.trialEndDate > now);
+    if (inTrial) {
+        return s.trialPrice !== null && s.trialPrice !== undefined
+            ? parseNumeric(s.trialPrice)
+            : 0;
+    }
+    return parseNumeric(s.price);
+}
+
+export function computeMonthlyCostForSubscription(
+    s: CostSub,
+    now: Date = new Date()
 ): number {
     return getMonthlyCost({
-        price: parseNumeric(s.price),
+        price: getEffectivePrice(s, now),
         billingCycle: s.billingCycle,
         customIntervalDays: s.customIntervalDays ?? null,
         taxAmount: parseNumeric(s.taxAmount),
@@ -525,17 +556,11 @@ export function computeMonthlyCostForSubscription(
 }
 
 export function computeYearlyCostForSubscription(
-    s: Pick<
-        Subscription,
-        | "price"
-        | "billingCycle"
-        | "customIntervalDays"
-        | "taxAmount"
-        | "discountAmount"
-    >
+    s: CostSub,
+    now: Date = new Date()
 ): number {
     return getYearlyCost({
-        price: parseNumeric(s.price),
+        price: getEffectivePrice(s, now),
         billingCycle: s.billingCycle,
         customIntervalDays: s.customIntervalDays ?? null,
         taxAmount: parseNumeric(s.taxAmount),

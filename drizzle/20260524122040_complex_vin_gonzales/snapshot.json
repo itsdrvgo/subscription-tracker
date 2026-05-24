@@ -1,9 +1,9 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "2e854495-9a2c-4287-9607-e1039a58e53c",
+  "id": "3310e8f1-096d-4344-90e3-4eaee42d7db9",
   "prevIds": [
-    "00000000-0000-0000-0000-000000000000"
+    "10ea40ae-9a88-4e17-acf6-e5b3b901ca52"
   ],
   "ddl": [
     {
@@ -720,6 +720,19 @@
       "generated": null,
       "identity": null,
       "name": "price",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "subscriptions"
+    },
+    {
+      "type": "numeric(12,2)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "trial_price",
       "entityType": "columns",
       "schema": "public",
       "table": "subscriptions"

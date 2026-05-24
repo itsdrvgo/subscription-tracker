@@ -3,6 +3,7 @@
 
 import { Icons } from "@/components/icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
     Form,
     FormControl,
@@ -60,15 +61,6 @@ import {
 
 interface PageProps {
     data?: FullSubscription;
-}
-
-function toDateInputValue(value: Date | string | null | undefined): string {
-    if (!value) return "";
-    const d = value instanceof Date ? value : new Date(value);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
 }
 
 export function SubscriptionFormFetch({ type }: { type: "create" | "edit" }) {
@@ -132,6 +124,7 @@ export function SubscriptionForm({ data }: PageProps) {
             billingCycle: data?.billingCycle ?? "monthly",
             customIntervalDays: data?.customIntervalDays ?? null,
             price: data?.price ?? "0",
+            trialPrice: data?.trialPrice ?? null,
             yearlyPrice: data?.yearlyPrice ?? null,
             currency: data?.currency ?? "USD",
             taxAmount: data?.taxAmount ?? "0",
@@ -201,7 +194,7 @@ export function SubscriptionForm({ data }: PageProps) {
                 onSubmit={form.handleSubmit(handleSubmit)}
                 className="space-y-6"
             >
-                <div className="grid gap-6 lg:grid-cols-3">
+                <div className="grid items-start gap-6 lg:grid-cols-3">
                     <div className="space-y-6 lg:col-span-2">
                         <BasicInfoCard
                             form={form}
@@ -269,7 +262,7 @@ function BasicInfoCard({
                 <CardTitle>Basic info</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid items-start gap-4 sm:grid-cols-2">
                     <FormField
                         control={form.control}
                         name="name"
@@ -399,13 +392,13 @@ function BillingCard({
                 <CardTitle>Billing</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid items-start gap-4 sm:grid-cols-3">
                     <FormField
                         control={form.control}
                         name="price"
                         render={({ field }) => (
                             <FormItem className="sm:col-span-2">
-                                <FormLabel>Price</FormLabel>
+                                <FormLabel>Regular price</FormLabel>
                                 <FormControl>
                                     <Input
                                         {...field}
@@ -417,6 +410,10 @@ function BillingCard({
                                         value={field.value ?? ""}
                                     />
                                 </FormControl>
+                                <FormDescription>
+                                    Price you&apos;re charged once any trial
+                                    ends.
+                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -455,7 +452,7 @@ function BillingCard({
                     />
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid items-start gap-4 sm:grid-cols-3">
                     <FormField
                         control={form.control}
                         name="billingCycle"
@@ -549,7 +546,7 @@ function BillingCard({
                     />
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid items-start gap-4 sm:grid-cols-2">
                     <FormField
                         control={form.control}
                         name="taxAmount"
@@ -614,22 +611,19 @@ function RenewalCard({
                 <CardTitle>Renewal</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid items-start gap-4 sm:grid-cols-2">
                     <FormField
                         control={form.control}
                         name="startDate"
                         render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="flex flex-col">
                                 <FormLabel>Start date</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        type="date"
+                                    <DatePicker
                                         disabled={isSubmitting}
-                                        value={toDateInputValue(field.value)}
-                                        onChange={(e) =>
-                                            field.onChange(
-                                                new Date(e.target.value)
-                                            )
+                                        value={field.value}
+                                        onChange={(d) =>
+                                            field.onChange(d ?? null)
                                         }
                                     />
                                 </FormControl>
@@ -642,17 +636,14 @@ function RenewalCard({
                         control={form.control}
                         name="nextRenewalDate"
                         render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="flex flex-col">
                                 <FormLabel>Next renewal</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        type="date"
+                                    <DatePicker
                                         disabled={isSubmitting}
-                                        value={toDateInputValue(field.value)}
-                                        onChange={(e) =>
-                                            field.onChange(
-                                                new Date(e.target.value)
-                                            )
+                                        value={field.value}
+                                        onChange={(d) =>
+                                            field.onChange(d ?? null)
                                         }
                                     />
                                 </FormControl>
@@ -711,28 +702,59 @@ function RenewalCard({
                 />
 
                 {isTrial && (
-                    <FormField
-                        control={form.control}
-                        name="trialEndDate"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Trial end date</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        type="date"
-                                        disabled={isSubmitting}
-                                        value={toDateInputValue(field.value)}
-                                        onChange={(e) =>
-                                            field.onChange(
-                                                new Date(e.target.value)
-                                            )
-                                        }
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                    <div className="grid items-start gap-4 sm:grid-cols-2">
+                        <FormField
+                            control={form.control}
+                            name="trialEndDate"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormLabel>Trial end date</FormLabel>
+                                    <FormControl>
+                                        <DatePicker
+                                            disabled={isSubmitting}
+                                            value={field.value}
+                                            onChange={(d) =>
+                                                field.onChange(d ?? null)
+                                            }
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="trialPrice"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Trial price</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            placeholder="0.00 (free)"
+                                            disabled={isSubmitting}
+                                            value={field.value ?? ""}
+                                            onChange={(e) =>
+                                                field.onChange(
+                                                    e.target.value === ""
+                                                        ? null
+                                                        : e.target.value
+                                                )
+                                            }
+                                        />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Price during the trial (e.g. ₹15/mo for
+                                        3 months). Leave blank for a free trial.
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
                 )}
             </CardContent>
         </Card>
