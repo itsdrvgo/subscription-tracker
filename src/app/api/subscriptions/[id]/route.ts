@@ -1,6 +1,6 @@
 import { MESSAGES } from "@/config/const";
+import { apiGuard, RATE_LIMITS } from "@/lib/api/security";
 import { queries } from "@/lib/db/queries";
-import { auth } from "@/lib/jwt";
 import { AppError, CResponse, handleError } from "@/lib/utils";
 import { updateSubscriptionSchema } from "@/lib/validations";
 import { NextRequest } from "next/server";
@@ -9,18 +9,15 @@ interface Context {
     params: Promise<{ id: string }>;
 }
 
-export async function GET(_: NextRequest, { params }: Context) {
+export async function GET(req: NextRequest, { params }: Context) {
     try {
-        const isAuth = await auth();
-        if (!isAuth?.user?.id)
-            throw new AppError(
-                MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
-                "UNAUTHORIZED"
-            );
+        const { userId } = await apiGuard(req, {
+            rateLimit: RATE_LIMITS.READ,
+        });
 
         const { id } = await params;
         const data = await queries.subscription.get({
-            userId: isAuth.user.id,
+            userId: userId!,
             id,
         });
         if (!data)
@@ -34,26 +31,24 @@ export async function GET(_: NextRequest, { params }: Context) {
 
 export async function PATCH(req: NextRequest, { params }: Context) {
     try {
-        const isAuth = await auth();
-        if (!isAuth?.user?.id)
-            throw new AppError(
-                MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
-                "UNAUTHORIZED"
-            );
+        const { userId } = await apiGuard(req, {
+            rateLimit: RATE_LIMITS.WRITE,
+            enforceOrigin: true,
+        });
 
         const { id } = await params;
         const body = await req.json();
         const values = updateSubscriptionSchema.parse(body);
 
         const existing = await queries.subscription.get({
-            userId: isAuth.user.id,
+            userId: userId!,
             id,
         });
         if (!existing)
             throw new AppError(MESSAGES.ERRORS.GENERAL.NOT_FOUND, "NOT_FOUND");
 
         const data = await queries.subscription.update({
-            userId: isAuth.user.id,
+            userId: userId!,
             id,
             values,
         });
@@ -66,7 +61,7 @@ export async function PATCH(req: NextRequest, { params }: Context) {
                 values.price !== undefined && values.price !== existing.price;
 
             await queries.activityLog.add({
-                userId: isAuth.user.id,
+                userId: userId!,
                 subscriptionId: id,
                 subscriptionName: data.name,
                 action: statusChanged
@@ -88,30 +83,28 @@ export async function PATCH(req: NextRequest, { params }: Context) {
     }
 }
 
-export async function DELETE(_: NextRequest, { params }: Context) {
+export async function DELETE(req: NextRequest, { params }: Context) {
     try {
-        const isAuth = await auth();
-        if (!isAuth?.user?.id)
-            throw new AppError(
-                MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
-                "UNAUTHORIZED"
-            );
+        const { userId } = await apiGuard(req, {
+            rateLimit: RATE_LIMITS.WRITE,
+            enforceOrigin: true,
+        });
 
         const { id } = await params;
         const existing = await queries.subscription.get({
-            userId: isAuth.user.id,
+            userId: userId!,
             id,
         });
         if (!existing)
             throw new AppError(MESSAGES.ERRORS.GENERAL.NOT_FOUND, "NOT_FOUND");
 
         await queries.subscription.delete({
-            userId: isAuth.user.id,
+            userId: userId!,
             ids: [id],
         });
 
         await queries.activityLog.add({
-            userId: isAuth.user.id,
+            userId: userId!,
             subscriptionId: null,
             subscriptionName: existing.name,
             action: "deleted",

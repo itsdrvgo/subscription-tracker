@@ -1,8 +1,7 @@
-import { MESSAGES } from "@/config/const";
+import { apiGuard, RATE_LIMITS } from "@/lib/api/security";
 import { queries } from "@/lib/db/queries";
 import { PAYMENT_SOURCE_TYPES } from "@/lib/db/schemas";
-import { auth } from "@/lib/jwt";
-import { AppError, CResponse, handleError } from "@/lib/utils";
+import { CResponse, handleError } from "@/lib/utils";
 import {
     createPaymentSourceSchema,
     deleteDataSchema,
@@ -26,12 +25,9 @@ const paymentSourceQuerySchema = paginationQuerySchema.extend({
 
 export async function GET(req: NextRequest) {
     try {
-        const isAuth = await auth();
-        if (!isAuth?.user?.id)
-            throw new AppError(
-                MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
-                "UNAUTHORIZED"
-            );
+        const { userId } = await apiGuard(req, {
+            rateLimit: RATE_LIMITS.READ,
+        });
 
         const { searchParams } = new URL(req.url);
         const { page, limit, search, isPaginated, ids, isActive, type } =
@@ -41,7 +37,7 @@ export async function GET(req: NextRequest) {
 
         if (!isPaginated) {
             const data = await queries.paymentSource.scan({
-                userId: isAuth.user.id,
+                userId: userId!,
                 ids,
                 isActive,
                 type,
@@ -51,7 +47,7 @@ export async function GET(req: NextRequest) {
         }
 
         const data = await queries.paymentSource.paginate({
-            userId: isAuth.user.id,
+            userId: userId!,
             limit,
             page,
             search,
@@ -66,18 +62,16 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
-        const isAuth = await auth();
-        if (!isAuth?.user?.id)
-            throw new AppError(
-                MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
-                "UNAUTHORIZED"
-            );
+        const { userId } = await apiGuard(req, {
+            rateLimit: RATE_LIMITS.WRITE,
+            enforceOrigin: true,
+        });
 
         const body = await req.json();
         const parsed = createPaymentSourceSchema.array().parse(body);
 
         const data = await queries.paymentSource.create({
-            userId: isAuth.user.id,
+            userId: userId!,
             values: parsed,
         });
         return CResponse({ message: "CREATED", data });
@@ -88,19 +82,17 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
     try {
-        const isAuth = await auth();
-        if (!isAuth?.user?.id)
-            throw new AppError(
-                MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
-                "UNAUTHORIZED"
-            );
+        const { userId } = await apiGuard(req, {
+            rateLimit: RATE_LIMITS.MUTATING_BULK,
+            enforceOrigin: true,
+        });
 
         const { searchParams } = new URL(req.url);
         const { ids } = deleteDataSchema.parse(
             Object.fromEntries(searchParams.entries())
         );
 
-        await queries.paymentSource.delete({ userId: isAuth.user.id, ids });
+        await queries.paymentSource.delete({ userId: userId!, ids });
         return CResponse();
     } catch (err) {
         return handleError(err);

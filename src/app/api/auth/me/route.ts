@@ -1,20 +1,17 @@
 import { MESSAGES } from "@/config/const";
+import { apiGuard, RATE_LIMITS } from "@/lib/api/security";
 import { queries } from "@/lib/db/queries";
-import { auth } from "@/lib/jwt";
 import { AppError, CResponse, handleError } from "@/lib/utils";
 import { updateProfileSchema } from "@/lib/validations";
 import { NextRequest } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
-        const isAuth = await auth();
-        if (!isAuth)
-            throw new AppError(
-                MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
-                "UNAUTHORIZED"
-            );
+        const { userId } = await apiGuard(req, {
+            rateLimit: RATE_LIMITS.READ,
+        });
 
-        const existingData = await queries.user.get({ id: isAuth.user!.id });
+        const existingData = await queries.user.get({ id: userId! });
         if (!existingData)
             throw new AppError(
                 MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
@@ -29,17 +26,15 @@ export async function GET() {
 
 export async function PATCH(req: NextRequest) {
     try {
-        const isAuth = await auth();
-        if (!isAuth)
-            throw new AppError(
-                MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
-                "UNAUTHORIZED"
-            );
+        const { userId } = await apiGuard(req, {
+            rateLimit: RATE_LIMITS.WRITE,
+            enforceOrigin: true,
+        });
 
         const body = await req.json();
         const values = updateProfileSchema.parse(body);
 
-        const existing = await queries.user.get({ id: isAuth.user!.id });
+        const existing = await queries.user.get({ id: userId! });
         if (!existing)
             throw new AppError(
                 MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,

@@ -24,12 +24,13 @@ export async function verifyToken(token: string): Promise<TokenPayload | null> {
     }
 }
 
-export async function auth() {
+export async function auth(): Promise<{ user: TokenPayload } | null> {
     const cookieStore = await cookies();
 
     const token = cookieStore.get(COOKIES.ADMIN)?.value;
     if (!token) return null;
 
     const user = await verifyToken(token);
+    if (!user?.id) return null;
     return { user };
 }

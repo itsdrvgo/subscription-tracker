@@ -1,20 +1,16 @@
-import { MESSAGES } from "@/config/const";
+import { apiGuard, RATE_LIMITS } from "@/lib/api/security";
 import { queries } from "@/lib/db/queries";
-import { auth } from "@/lib/jwt";
-import { AppError, CResponse, handleError } from "@/lib/utils";
+import { CResponse, handleError } from "@/lib/utils";
 import { upsertBudgetSchema } from "@/lib/validations";
 import { NextRequest } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
-        const isAuth = await auth();
-        if (!isAuth?.user?.id)
-            throw new AppError(
-                MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
-                "UNAUTHORIZED"
-            );
+        const { userId } = await apiGuard(req, {
+            rateLimit: RATE_LIMITS.READ,
+        });
 
-        const data = await queries.budget.get({ userId: isAuth.user.id });
+        const data = await queries.budget.get({ userId: userId! });
         return CResponse({ data });
     } catch (err) {
         return handleError(err);
@@ -23,18 +19,16 @@ export async function GET() {
 
 export async function PUT(req: NextRequest) {
     try {
-        const isAuth = await auth();
-        if (!isAuth?.user?.id)
-            throw new AppError(
-                MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
-                "UNAUTHORIZED"
-            );
+        const { userId } = await apiGuard(req, {
+            rateLimit: RATE_LIMITS.WRITE,
+            enforceOrigin: true,
+        });
 
         const body = await req.json();
         const parsed = upsertBudgetSchema.parse(body);
 
         const data = await queries.budget.upsert({
-            userId: isAuth.user.id,
+            userId: userId!,
             values: parsed,
         });
         return CResponse({ data });
@@ -43,16 +37,14 @@ export async function PUT(req: NextRequest) {
     }
 }
 
-export async function DELETE() {
+export async function DELETE(req: NextRequest) {
     try {
-        const isAuth = await auth();
-        if (!isAuth?.user?.id)
-            throw new AppError(
-                MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
-                "UNAUTHORIZED"
-            );
+        const { userId } = await apiGuard(req, {
+            rateLimit: RATE_LIMITS.WRITE,
+            enforceOrigin: true,
+        });
 
-        await queries.budget.delete({ userId: isAuth.user.id });
+        await queries.budget.delete({ userId: userId! });
         return CResponse();
     } catch (err) {
         return handleError(err);

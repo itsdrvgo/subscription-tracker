@@ -1,4 +1,5 @@
 import { COOKIES, MESSAGES } from "@/config/const";
+import { apiGuard, RATE_LIMITS } from "@/lib/api/security";
 import { queries } from "@/lib/db/queries";
 import { signToken } from "@/lib/jwt";
 import { AppError, CResponse, handleError } from "@/lib/utils";
@@ -7,8 +8,19 @@ import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
+// Fixed dummy hash so failed lookups still spend bcrypt time and don't
+// leak account existence via response timing.
+const DUMMY_HASH =
+    "$2b$10$CwTycUXWue0Thq9StjUM0uJ8r3sPWv9.LcGdSGN.OY9o6QQzS7Pmu";
+
 export async function POST(req: NextRequest) {
     try {
+        await apiGuard(req, {
+            requireAuth: false,
+            rateLimit: RATE_LIMITS.AUTH_STRICT,
+            enforceOrigin: true,
+        });
+
         const body = await req.json();
         const { email, password } = signInSchema.parse(body);
 
@@ -16,20 +28,14 @@ export async function POST(req: NextRequest) {
             email,
             safeParse: false,
         });
-        if (!existingData)
+
+        const hashToCompare = existingData?.password ?? DUMMY_HASH;
+        const isPasswordValid = await bcrypt.compare(password, hashToCompare);
+
+        if (!existingData || !isPasswordValid)
             throw new AppError(
                 MESSAGES.ERRORS.AUTH.INVALID_CREDENTIALS,
                 "UNAUTHORIZED"
-            );
-
-        const isPasswordValid = await bcrypt.compare(
-            password,
-            existingData.password
-        );
-        if (!isPasswordValid)
-            throw new AppError(
-                MESSAGES.ERRORS.AUTH.INVALID_CREDENTIALS,
-                "FORBIDDEN"
             );
 
         const token = await signToken({ id: existingData.id });

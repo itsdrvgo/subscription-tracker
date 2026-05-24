@@ -1,7 +1,7 @@
 import { MESSAGES } from "@/config/const";
+import { apiGuard, RATE_LIMITS } from "@/lib/api/security";
 import { queries } from "@/lib/db/queries";
 import { SUBSCRIPTION_STATUSES } from "@/lib/db/schemas";
-import { auth } from "@/lib/jwt";
 import { AppError, CResponse, handleError } from "@/lib/utils";
 import {
     bulkIdsSchema,
@@ -54,12 +54,9 @@ const subscriptionPaginationQuerySchema = paginationQuerySchema.extend({
 
 export async function GET(req: NextRequest) {
     try {
-        const isAuth = await auth();
-        if (!isAuth?.user?.id)
-            throw new AppError(
-                MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
-                "UNAUTHORIZED"
-            );
+        const { userId } = await apiGuard(req, {
+            rateLimit: RATE_LIMITS.READ,
+        });
 
         const { searchParams } = new URL(req.url);
 
@@ -80,7 +77,7 @@ export async function GET(req: NextRequest) {
 
         if (!isPaginated) {
             const data = await queries.subscription.scan({
-                userId: isAuth.user.id,
+                userId: userId!,
                 ids,
                 status,
                 statusIn,
@@ -93,7 +90,7 @@ export async function GET(req: NextRequest) {
         }
 
         const data = await queries.subscription.paginate({
-            userId: isAuth.user.id,
+            userId: userId!,
             limit,
             page,
             search,
@@ -111,24 +108,22 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
-        const isAuth = await auth();
-        if (!isAuth?.user?.id)
-            throw new AppError(
-                MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
-                "UNAUTHORIZED"
-            );
+        const { userId } = await apiGuard(req, {
+            rateLimit: RATE_LIMITS.WRITE,
+            enforceOrigin: true,
+        });
 
         const body = await req.json();
         const parsed = createSubscriptionSchema.array().parse(body);
 
         const data = await queries.subscription.create({
-            userId: isAuth.user.id,
+            userId: userId!,
             values: parsed,
         });
 
         await queries.activityLog.addMany(
             data.map((s) => ({
-                userId: isAuth.user!.id,
+                userId: userId!,
                 subscriptionId: s.id,
                 subscriptionName: s.name,
                 action: "created" as const,
@@ -148,12 +143,10 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
     try {
-        const isAuth = await auth();
-        if (!isAuth?.user?.id)
-            throw new AppError(
-                MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
-                "UNAUTHORIZED"
-            );
+        const { userId } = await apiGuard(req, {
+            rateLimit: RATE_LIMITS.MUTATING_BULK,
+            enforceOrigin: true,
+        });
 
         const body = await req.json();
         const { ids, values } = z
@@ -164,7 +157,7 @@ export async function PATCH(req: NextRequest) {
             .parse(body);
 
         const existing = await queries.subscription.scan({
-            userId: isAuth.user.id,
+            userId: userId!,
             ids,
         });
         const invalidIds = ids.filter(
@@ -177,14 +170,14 @@ export async function PATCH(req: NextRequest) {
             );
 
         const data = await queries.subscription.bulkUpdate({
-            userId: isAuth.user.id,
+            userId: userId!,
             ids,
             values,
         });
 
         await queries.activityLog.addMany(
             data.map((s) => ({
-                userId: isAuth.user!.id,
+                userId: userId!,
                 subscriptionId: s.id,
                 subscriptionName: s.name,
                 action: "updated" as const,
@@ -200,12 +193,10 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
     try {
-        const isAuth = await auth();
-        if (!isAuth?.user?.id)
-            throw new AppError(
-                MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
-                "UNAUTHORIZED"
-            );
+        const { userId } = await apiGuard(req, {
+            rateLimit: RATE_LIMITS.MUTATING_BULK,
+            enforceOrigin: true,
+        });
 
         const { searchParams } = new URL(req.url);
         const { ids } = deleteDataSchema.parse(
@@ -213,7 +204,7 @@ export async function DELETE(req: NextRequest) {
         );
 
         const existing = await queries.subscription.scan({
-            userId: isAuth.user.id,
+            userId: userId!,
             ids,
         });
         const invalidIds = ids.filter(
@@ -226,13 +217,13 @@ export async function DELETE(req: NextRequest) {
             );
 
         await queries.subscription.delete({
-            userId: isAuth.user.id,
+            userId: userId!,
             ids,
         });
 
         await queries.activityLog.addMany(
             existing.map((s) => ({
-                userId: isAuth.user!.id,
+                userId: userId!,
                 subscriptionId: null,
                 subscriptionName: s.name,
                 action: "deleted" as const,

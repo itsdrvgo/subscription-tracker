@@ -1,8 +1,7 @@
-import { MESSAGES } from "@/config/const";
+import { apiGuard, RATE_LIMITS } from "@/lib/api/security";
 import { queries } from "@/lib/db/queries";
 import { ACTIVITY_ACTIONS } from "@/lib/db/schemas";
-import { auth } from "@/lib/jwt";
-import { AppError, CResponse, handleError } from "@/lib/utils";
+import { CResponse, handleError } from "@/lib/utils";
 import { paginationQuerySchema } from "@/lib/validations";
 import { NextRequest } from "next/server";
 import z from "zod";
@@ -24,12 +23,9 @@ const activityQuerySchema = paginationQuerySchema.extend({
 
 export async function GET(req: NextRequest) {
     try {
-        const isAuth = await auth();
-        if (!isAuth?.user?.id)
-            throw new AppError(
-                MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
-                "UNAUTHORIZED"
-            );
+        const { userId } = await apiGuard(req, {
+            rateLimit: RATE_LIMITS.READ,
+        });
 
         const { searchParams } = new URL(req.url);
         const { page, limit, subscriptionId, action } =
@@ -38,7 +34,7 @@ export async function GET(req: NextRequest) {
             );
 
         const data = await queries.activityLog.paginate({
-            userId: isAuth.user.id,
+            userId: userId!,
             page,
             limit,
             subscriptionId,

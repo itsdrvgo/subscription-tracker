@@ -1,6 +1,6 @@
 import { COOKIES, MESSAGES } from "@/config/const";
+import { apiGuard, RATE_LIMITS } from "@/lib/api/security";
 import { queries } from "@/lib/db/queries";
-import { auth } from "@/lib/jwt";
 import { AppError, CResponse, handleError } from "@/lib/utils";
 import { updatePasswordSchema } from "@/lib/validations";
 import bcrypt from "bcryptjs";
@@ -9,19 +9,17 @@ import { NextRequest } from "next/server";
 
 export async function PATCH(req: NextRequest) {
     try {
-        const isAuth = await auth();
-        if (!isAuth)
-            throw new AppError(
-                MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
-                "UNAUTHORIZED"
-            );
+        const { userId } = await apiGuard(req, {
+            rateLimit: RATE_LIMITS.AUTH_STRICT,
+            enforceOrigin: true,
+        });
 
         const body = await req.json();
         const { currentPassword, newPassword } =
             updatePasswordSchema.parse(body);
 
         const existing = await queries.user.get({
-            id: isAuth.user!.id,
+            id: userId!,
             safeParse: false,
         });
         if (!existing)
@@ -40,7 +38,7 @@ export async function PATCH(req: NextRequest) {
                 "FORBIDDEN"
             );
 
-        const passwordHash = await bcrypt.hash(newPassword, 10);
+        const passwordHash = await bcrypt.hash(newPassword, 12);
         const data = await queries.user.updatePassword({
             id: existing.id,
             passwordHash,

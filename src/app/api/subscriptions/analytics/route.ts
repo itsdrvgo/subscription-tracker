@@ -1,19 +1,16 @@
-import { MESSAGES } from "@/config/const";
+import { apiGuard, RATE_LIMITS } from "@/lib/api/security";
 import { queries } from "@/lib/db/queries";
-import { auth } from "@/lib/jwt";
-import { AppError, CResponse, handleError } from "@/lib/utils";
+import { CResponse, handleError } from "@/lib/utils";
+import { NextRequest } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
-        const isAuth = await auth();
-        if (!isAuth?.user?.id)
-            throw new AppError(
-                MESSAGES.ERRORS.GENERAL.UNAUTHORIZED,
-                "UNAUTHORIZED"
-            );
+        const { userId } = await apiGuard(req, {
+            rateLimit: RATE_LIMITS.READ,
+        });
 
         const data = await queries.analytics.getDashboard({
-            userId: isAuth.user.id,
+            userId: userId!,
         });
         return CResponse({ data });
     } catch (err) {

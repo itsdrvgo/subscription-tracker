@@ -122,7 +122,7 @@ export function useAuth() {
                     { id: toastId, duration: 6000 }
                 );
                 queryClient.clear();
-                router.replace("/signin");
+                router.replace("/auth/signin");
             },
             onError: handleClientError,
         });
@@ -149,7 +149,7 @@ export function useAuth() {
                     { id: toastId, duration: 6000 }
                 );
                 queryClient.clear();
-                router.replace("/signin");
+                router.replace("/auth/signin");
             },
             onError: handleClientError,
         });
