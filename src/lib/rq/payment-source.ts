@@ -1,5 +1,9 @@
 "use client";
 
+import {
+    PAYMENT_SOURCE_QUERY_KEY,
+    SUBSCRIPTION_QUERY_KEY,
+} from "@/config/const";
 import { cFetch, handleClientError } from "@/lib/utils";
 import {
     CreatePaymentSource,
@@ -10,15 +14,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-const KEY = ["payment-source"] as const;
-
 export function usePaymentSource() {
     const router = useRouter();
     const queryClient = useQueryClient();
 
     const invalidate = () => {
-        queryClient.invalidateQueries({ queryKey: KEY });
-        queryClient.invalidateQueries({ queryKey: ["subscription"] });
+        queryClient.invalidateQueries({ queryKey: PAYMENT_SOURCE_QUERY_KEY });
+        queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEY });
     };
 
     const useScan = ({
@@ -35,7 +37,7 @@ export function usePaymentSource() {
         enabled?: boolean;
     } = {}) => {
         return useQuery({
-            queryKey: [...KEY, "scan", ids, isActive, type, search],
+            queryKey: [...PAYMENT_SOURCE_QUERY_KEY, "scan", ids, isActive, type, search],
             queryFn: async () => {
                 const params = new URLSearchParams();
                 if (ids?.length) params.set("ids", ids.join(","));
@@ -57,7 +59,7 @@ export function usePaymentSource() {
 
     const useGet = ({ id, enabled }: { id: string; enabled?: boolean }) => {
         return useQuery({
-            queryKey: [...KEY, "get", id],
+            queryKey: [...PAYMENT_SOURCE_QUERY_KEY, "get", id],
             queryFn: async () => {
                 const res = await cFetch<PaymentSource>(
                     `/api/subscriptions/payment-sources/${id}`

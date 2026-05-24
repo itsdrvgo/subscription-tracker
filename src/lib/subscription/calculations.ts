@@ -1,12 +1,7 @@
-import { BILLING_CYCLES } from "@/lib/db/schemas";
+import { BILLING_CYCLES } from "@/config/const";
 
 type BillingCycle = (typeof BILLING_CYCLES)[number];
 
-/**
- * Returns the equivalent monthly cost for a given billing cycle, in the
- * subscription's native currency. Treats yearly/quarterly/weekly as their
- * spread monthly equivalent so analytics can compare across cycles.
- */
 export function getMonthlyCost(params: {
     price: number;
     billingCycle: BillingCycle;
@@ -47,9 +42,6 @@ export function getYearlyCost(params: {
     return getMonthlyCost(params) * 12;
 }
 
-/**
- * Add a billing cycle to a date and return the next renewal date.
- */
 export function getNextRenewalDate(params: {
     from: Date;
     billingCycle: BillingCycle;
@@ -78,11 +70,8 @@ export function getNextRenewalDate(params: {
     return next;
 }
 
-/**
- * Roll a renewal date forward until it is in the future, applying the billing
- * cycle repeatedly. Used by the cron job to bring stale renewals current
- * after one or more elapsed cycles.
- */
+// Cron uses this to catch up renewals that lapsed across multiple cycles
+// while the worker was offline. Guard prevents runaway loops on bad data.
 export function rollRenewalForward(params: {
     from: Date;
     billingCycle: BillingCycle;
@@ -101,25 +90,4 @@ export function rollRenewalForward(params: {
         guard++;
     }
     return next;
-}
-
-export function daysUntil(date: Date, from: Date = new Date()): number {
-    const a = new Date(date);
-    a.setHours(0, 0, 0, 0);
-    const b = new Date(from);
-    b.setHours(0, 0, 0, 0);
-    const diff = a.getTime() - b.getTime();
-    return Math.round(diff / (1000 * 60 * 60 * 24));
-}
-
-export function startOfDay(date: Date = new Date()): Date {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    return d;
-}
-
-export function endOfDay(date: Date = new Date()): Date {
-    const d = new Date(date);
-    d.setHours(23, 59, 59, 999);
-    return d;
 }

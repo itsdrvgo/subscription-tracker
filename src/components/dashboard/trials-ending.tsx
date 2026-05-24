@@ -9,7 +9,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { daysUntil, formatCurrency } from "@/lib/subscription";
+import { daysUntil, formatCurrency } from "@/lib/utils";
 import { FullSubscription } from "@/lib/validations";
 import Link from "next/link";
 

@@ -1,27 +1,29 @@
 "use client";
 
+import {
+    BUDGET_QUERY_KEY,
+    SUBSCRIPTION_ANALYTICS_QUERY_KEY,
+} from "@/config/const";
 import { cFetch, handleClientError } from "@/lib/utils";
 import { Budget, UpsertBudget } from "@/lib/validations";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-const KEY = ["budget"] as const;
-
 export function useBudget() {
     const router = useRouter();
     const queryClient = useQueryClient();
 
     const invalidate = () => {
-        queryClient.invalidateQueries({ queryKey: KEY });
+        queryClient.invalidateQueries({ queryKey: BUDGET_QUERY_KEY });
         queryClient.invalidateQueries({
-            queryKey: ["subscription", "analytics"],
+            queryKey: SUBSCRIPTION_ANALYTICS_QUERY_KEY,
         });
     };
 
     const useGet = () => {
         return useQuery({
-            queryKey: KEY,
+            queryKey: BUDGET_QUERY_KEY,
             queryFn: async () => {
                 const res = await cFetch<Budget | null>(
                     "/api/subscriptions/budget"

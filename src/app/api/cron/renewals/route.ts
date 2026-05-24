@@ -1,5 +1,6 @@
 import { env } from "@/env";
-import { apiGuard, RATE_LIMITS } from "@/lib/api/security";
+import { RATE_LIMITS } from "@/config/const";
+import { apiGuard } from "@/lib/api/security";
 import { runRenewalCron } from "@/lib/cron/run";
 import { AppError, CResponse, handleError } from "@/lib/utils";
 import { NextRequest } from "next/server";

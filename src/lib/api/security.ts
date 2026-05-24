@@ -1,14 +1,10 @@
-import { MESSAGES } from "@/config/const";
+import { MESSAGES, RateLimitPreset } from "@/config/const";
 import { auth } from "@/lib/jwt";
 import { AppError, getClientIp } from "@/lib/utils";
-import {
-    checkRateLimit,
-    RateLimitPreset,
-    RATE_LIMITS,
-} from "./rate-limit";
+import { checkRateLimit } from "./rate-limit";
 
-export { checkRateLimit, RATE_LIMITS };
-export type { RateLimitPreset, RateLimitResult } from "./rate-limit";
+export { checkRateLimit } from "./rate-limit";
+export type { RateLimitResult } from "./rate-limit";
 
 interface GuardOptions {
     requireAuth?: boolean;
@@ -20,11 +16,6 @@ interface GuardResult {
     userId: string | null;
 }
 
-/**
- * Verifies same-origin requests by comparing the Origin header to the
- * request Host. Browsers always set Origin for fetch/XHR; missing Origin
- * (e.g. same-origin GETs, server-to-server calls) is treated as allowed.
- */
 function assertSameOrigin(req: Request) {
     const origin = req.headers.get("origin");
     if (!origin) return;
@@ -40,11 +31,6 @@ function assertSameOrigin(req: Request) {
         throw new AppError("Origin mismatch", "FORBIDDEN");
 }
 
-/**
- * Single entry point for route-level security: auth check, rate limit,
- * and optional CSRF (Origin) check. Throws AppError on failure so callers
- * can rely on the existing handleError() pipeline.
- */
 export async function apiGuard(
     req: Request,
     opts: GuardOptions = {}

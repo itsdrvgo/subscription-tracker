@@ -27,10 +27,9 @@ export type RateLimitResult =
     | { ok: true; remaining: number; resetAt: number }
     | { ok: false; remaining: 0; resetAt: number; retryAfterMs: number };
 
-/**
- * Fixed-window in-memory rate limiter. Per process, not shared across
- * serverless instances — accept that trade-off for a Redis-free setup.
- */
+// In-memory fixed-window limiter. Per-process state — accept that trade-off
+// for a Redis-free setup; consequence is each serverless instance gets its
+// own bucket, so the global cap is `limit * instances`.
 export function checkRateLimit(
     key: string,
     limit: number,
@@ -60,15 +59,3 @@ export function checkRateLimit(
         resetAt: bucket.resetAt,
     };
 }
-
-export const RATE_LIMITS = {
-    AUTH_STRICT: { limit: 5, windowMs: 60_000 },
-    AUTH_GENERAL: { limit: 30, windowMs: 60_000 },
-    READ: { limit: 120, windowMs: 60_000 },
-    WRITE: { limit: 30, windowMs: 60_000 },
-    MUTATING_BULK: { limit: 10, windowMs: 60_000 },
-    CRON: { limit: 12, windowMs: 60_000 },
-    EDGE_GLOBAL: { limit: 300, windowMs: 60_000 },
-} as const;
-
-export type RateLimitPreset = (typeof RATE_LIMITS)[keyof typeof RATE_LIMITS];

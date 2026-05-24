@@ -1,4 +1,5 @@
 import { MESSAGES } from "@/config/const";
+import { CURRENCY_SYMBOLS } from "@/config/subscription";
 import { clsx, type ClassValue } from "clsx";
 import { NextResponse } from "next/server";
 import { toast } from "sonner";
@@ -369,4 +370,55 @@ export function generateCustomCacheKey(
             .filter(Boolean)
             .join(separator)
     );
+}
+
+export function formatCurrency(
+    amount: number | string | null | undefined,
+    currency: string = "USD",
+    options: { keepDecimals?: boolean; compact?: boolean } = {}
+): string {
+    const n = typeof amount === "string" ? parseFloat(amount) : (amount ?? 0);
+    if (!Number.isFinite(n)) return "—";
+
+    const { keepDecimals = true, compact = false } = options;
+
+    try {
+        return new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency,
+            minimumFractionDigits: keepDecimals ? 2 : 0,
+            maximumFractionDigits: keepDecimals ? 2 : 0,
+            notation: compact ? "compact" : "standard",
+        }).format(n);
+    } catch {
+        const symbol = CURRENCY_SYMBOLS[currency] ?? currency + " ";
+        return `${symbol}${keepDecimals ? n.toFixed(2) : Math.round(n)}`;
+    }
+}
+
+export function parseNumeric(
+    value: string | number | null | undefined
+): number {
+    if (value === null || value === undefined) return 0;
+    if (typeof value === "number") return value;
+    const n = parseFloat(value);
+    return Number.isFinite(n) ? n : 0;
+}
+
+export function startOfDay(date: Date = new Date()): Date {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    return d;
+}
+
+export function endOfDay(date: Date = new Date()): Date {
+    const d = new Date(date);
+    d.setHours(23, 59, 59, 999);
+    return d;
+}
+
+export function daysUntil(date: Date, from: Date = new Date()): number {
+    const a = startOfDay(date);
+    const b = startOfDay(from);
+    return Math.round((a.getTime() - b.getTime()) / (1000 * 60 * 60 * 24));
 }

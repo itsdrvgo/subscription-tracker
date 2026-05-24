@@ -10,7 +10,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatCurrency } from "@/lib/subscription";
+import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { SubscriptionStats } from "@/lib/validations";
 import Link from "next/link";

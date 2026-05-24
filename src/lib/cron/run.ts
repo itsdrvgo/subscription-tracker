@@ -11,13 +11,13 @@ import {
     sendEmail,
     trialEndingEmail,
 } from "@/lib/email";
+import { rollRenewalForward } from "@/lib/subscription";
 import {
     daysUntil,
+    getAbsoluteURL,
     parseNumeric,
-    rollRenewalForward,
     startOfDay,
-} from "@/lib/subscription";
-import { getAbsoluteURL } from "@/lib/utils";
+} from "@/lib/utils";
 import { FullSubscription, SafeUser } from "@/lib/validations";
 import { addDays } from "date-fns";
 import { eq } from "drizzle-orm";
@@ -49,8 +49,6 @@ async function advanceDueRenewals(report: CronReport, now: Date) {
     const due = await queries.subscription.findDueForRenewal({ now });
     if (!due.length) return;
 
-    const userMap = await loadUsersByIds(due.map((s) => s.userId));
-
     for (const s of due) {
         try {
             const newDate = rollRenewalForward({
@@ -74,9 +72,6 @@ async function advanceDueRenewals(report: CronReport, now: Date) {
                 },
             });
             report.renewalsAdvanced++;
-            // userMap is loaded but unused here; renewals don't email — this
-            // is a no-op silent advance. Reminders are handled separately.
-            void userMap;
         } catch (err) {
             report.errors.push(
                 `advance renewal ${s.id}: ${err instanceof Error ? err.message : String(err)}`
@@ -266,7 +261,6 @@ async function sendTrialEndingReminders(report: CronReport, now: Date) {
 }
 
 async function sendBudgetAlerts(report: CronReport, now: Date) {
-    // Iterate budgets and compute usage per user
     const allBudgets = await db.query.budgets.findMany({});
     if (!allBudgets.length) return;
 

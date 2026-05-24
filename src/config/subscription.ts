@@ -1,10 +1,11 @@
 import {
     BILLING_CYCLES,
+    CURRENCIES,
     PAYMENT_SOURCE_TYPES,
     SUBSCRIPTION_KINDS,
     SUBSCRIPTION_PRIORITIES,
     SUBSCRIPTION_STATUSES,
-} from "@/lib/db/schemas";
+} from "./const";
 
 export const BILLING_CYCLE_LABELS: Record<
     (typeof BILLING_CYCLES)[number],
@@ -85,19 +86,6 @@ export const PAYMENT_SOURCE_TYPE_LABELS: Record<
     manual: "Manual",
     custom: "Custom",
 };
-
-export const CURRENCIES = [
-    { code: "USD", symbol: "$", label: "US Dollar" },
-    { code: "EUR", symbol: "€", label: "Euro" },
-    { code: "GBP", symbol: "£", label: "British Pound" },
-    { code: "INR", symbol: "₹", label: "Indian Rupee" },
-    { code: "JPY", symbol: "¥", label: "Japanese Yen" },
-    { code: "CAD", symbol: "C$", label: "Canadian Dollar" },
-    { code: "AUD", symbol: "A$", label: "Australian Dollar" },
-    { code: "CHF", symbol: "Fr", label: "Swiss Franc" },
-    { code: "CNY", symbol: "¥", label: "Chinese Yuan" },
-    { code: "SGD", symbol: "S$", label: "Singapore Dollar" },
-] as const;
 
 export const CURRENCY_SYMBOLS: Record<string, string> = CURRENCIES.reduce(
     (acc, c) => {

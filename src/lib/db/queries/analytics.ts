@@ -1,5 +1,5 @@
 import { buildCurrencyConverter } from "@/lib/currency/exchange";
-import { parseNumeric } from "@/lib/subscription";
+import { parseNumeric } from "@/lib/utils";
 import { FullSubscription, SubscriptionStats } from "@/lib/validations";
 import { addDays, subMonths } from "date-fns";
 import { queries } from "./index";
@@ -190,7 +190,6 @@ class AnalyticsQuery {
             }))
             .sort((a, b) => b.monthlyCost - a.monthlyCost);
 
-        // Monthly trend over the last 6 months, also converted.
         const monthlyTrend: SubscriptionStats["monthlyTrend"] = [];
         for (let i = 5; i >= 0; i--) {
             const month = subMonths(now, i);
@@ -226,7 +225,6 @@ class AnalyticsQuery {
             monthlyTrend.push({ month: format(month), spend });
         }
 
-        // Budget rollup
         let budgetStatsOut: SubscriptionStats["budget"] = null;
         if (budget) {
             const monthlyLimit = budget.monthlyLimit
@@ -292,9 +290,6 @@ class AnalyticsQuery {
         };
     }
 
-    /**
-     * Compact dashboard payload: stats plus upcoming/recent lists.
-     */
     async getDashboard({ userId }: { userId: string }) {
         const [stats, allSubs, activity] = await Promise.all([
             this.getStats({ userId }),

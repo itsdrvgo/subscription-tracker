@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { COOKIES } from "./config/const";
-import { checkRateLimit, RATE_LIMITS } from "./lib/api/rate-limit";
+import { COOKIES, RATE_LIMITS } from "./config/const";
+import { checkRateLimit } from "./lib/api/rate-limit";
 import { signToken, verifyToken } from "./lib/jwt";
 import { CResponse, getClientIp } from "./lib/utils";
 

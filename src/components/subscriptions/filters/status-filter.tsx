@@ -8,8 +8,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { SUBSCRIPTION_STATUSES } from "@/config/const";
 import { STATUS_LABELS } from "@/config/subscription";
-import { SUBSCRIPTION_STATUSES } from "@/lib/db/schemas";
 
 type Status = (typeof SUBSCRIPTION_STATUSES)[number];
 

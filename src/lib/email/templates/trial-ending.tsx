@@ -1,4 +1,4 @@
-import { formatCurrency } from "@/lib/subscription";
+import { formatCurrency } from "@/lib/utils";
 import { FullSubscription } from "@/lib/validations";
 import { render, Text } from "react-email";
 import { DetailsTable, EmailLayout, PrimaryButton } from "./layout";

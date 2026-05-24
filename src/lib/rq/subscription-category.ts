@@ -1,5 +1,9 @@
 "use client";
 
+import {
+    SUBSCRIPTION_CATEGORY_QUERY_KEY,
+    SUBSCRIPTION_QUERY_KEY,
+} from "@/config/const";
 import { cFetch, handleClientError } from "@/lib/utils";
 import {
     CreateSubscriptionCategory,
@@ -10,15 +14,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-const KEY = ["subscription-category"] as const;
-
 export function useSubscriptionCategory() {
     const router = useRouter();
     const queryClient = useQueryClient();
 
     const invalidate = () => {
-        queryClient.invalidateQueries({ queryKey: KEY });
-        queryClient.invalidateQueries({ queryKey: ["subscription"] });
+        queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_CATEGORY_QUERY_KEY });
+        queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEY });
     };
 
     const useScan = ({
@@ -31,7 +33,7 @@ export function useSubscriptionCategory() {
         enabled?: boolean;
     } = {}) => {
         return useQuery({
-            queryKey: [...KEY, "scan", ids, search],
+            queryKey: [...SUBSCRIPTION_CATEGORY_QUERY_KEY, "scan", ids, search],
             queryFn: async () => {
                 const params = new URLSearchParams();
                 if (ids?.length) params.set("ids", ids.join(","));
@@ -50,7 +52,7 @@ export function useSubscriptionCategory() {
 
     const useGet = ({ id, enabled }: { id: string; enabled?: boolean }) => {
         return useQuery({
-            queryKey: [...KEY, "get", id],
+            queryKey: [...SUBSCRIPTION_CATEGORY_QUERY_KEY, "get", id],
             queryFn: async () => {
                 const res = await cFetch<SubscriptionCategory>(
                     `/api/subscriptions/categories/${id}`

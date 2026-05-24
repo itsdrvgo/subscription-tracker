@@ -10,7 +10,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ACTIVITY_ACTIONS } from "@/lib/db/schemas";
+import { ACTIVITY_ACTIONS } from "@/config/const";
 import { useSubscription } from "@/lib/rq";
 import { convertValueToLabel } from "@/lib/utils";
 import { format, formatDistanceToNow } from "date-fns";

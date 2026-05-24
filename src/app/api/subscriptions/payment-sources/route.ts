@@ -1,6 +1,6 @@
-import { apiGuard, RATE_LIMITS } from "@/lib/api/security";
+import { PAYMENT_SOURCE_TYPES, RATE_LIMITS } from "@/config/const";
+import { apiGuard } from "@/lib/api/security";
 import { queries } from "@/lib/db/queries";
-import { PAYMENT_SOURCE_TYPES } from "@/lib/db/schemas";
 import { CResponse, handleError } from "@/lib/utils";
 import {
     createPaymentSourceSchema,

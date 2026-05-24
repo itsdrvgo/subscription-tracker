@@ -1,6 +1,6 @@
-import { apiGuard, RATE_LIMITS } from "@/lib/api/security";
+import { ACTIVITY_ACTIONS, RATE_LIMITS } from "@/config/const";
+import { apiGuard } from "@/lib/api/security";
 import { queries } from "@/lib/db/queries";
-import { ACTIVITY_ACTIONS } from "@/lib/db/schemas";
 import { CResponse, handleError } from "@/lib/utils";
 import { paginationQuerySchema } from "@/lib/validations";
 import { NextRequest } from "next/server";

@@ -32,8 +32,8 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
+import { PAYMENT_SOURCE_TYPES } from "@/config/const";
 import { PAYMENT_SOURCE_TYPE_LABELS } from "@/config/subscription";
-import { PAYMENT_SOURCE_TYPES } from "@/lib/db/schemas";
 import { usePaymentSource } from "@/lib/rq";
 import {
     CreatePaymentSource,

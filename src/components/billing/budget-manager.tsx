@@ -21,7 +21,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CURRENCIES } from "@/config/subscription";
+import { CURRENCIES } from "@/config/const";
 import { useBudget } from "@/lib/rq";
 import { UpsertBudget, upsertBudgetSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";

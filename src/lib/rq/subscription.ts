@@ -1,5 +1,10 @@
 "use client";
 
+import {
+    SUBSCRIPTION_ACTIVITY_QUERY_KEY,
+    SUBSCRIPTION_ANALYTICS_QUERY_KEY,
+    SUBSCRIPTION_QUERY_KEY,
+} from "@/config/const";
 import { cFetch, handleClientError } from "@/lib/utils";
 import {
     BulkUpdateSubscription,
@@ -14,10 +19,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-const SUBSCRIPTION_KEY = ["subscription"] as const;
-const ANALYTICS_KEY = ["subscription", "analytics"] as const;
-const ACTIVITY_KEY = ["subscription", "activity"] as const;
-
 type SubscriptionStatus = Subscription["status"];
 
 export function useSubscription() {
@@ -25,9 +26,9 @@ export function useSubscription() {
     const queryClient = useQueryClient();
 
     const invalidateAll = () => {
-        queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_KEY });
-        queryClient.invalidateQueries({ queryKey: ANALYTICS_KEY });
-        queryClient.invalidateQueries({ queryKey: ACTIVITY_KEY });
+        queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEY });
+        queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_ANALYTICS_QUERY_KEY });
+        queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_ACTIVITY_QUERY_KEY });
     };
 
     const usePaginate = ({
@@ -53,7 +54,7 @@ export function useSubscription() {
     } = {}) => {
         return useQuery({
             queryKey: [
-                ...SUBSCRIPTION_KEY,
+                ...SUBSCRIPTION_QUERY_KEY,
                 "paginate",
                 page,
                 limit,
@@ -111,7 +112,7 @@ export function useSubscription() {
     } = {}) => {
         return useQuery({
             queryKey: [
-                ...SUBSCRIPTION_KEY,
+                ...SUBSCRIPTION_QUERY_KEY,
                 "scan",
                 ids,
                 status,
@@ -145,7 +146,7 @@ export function useSubscription() {
 
     const useGet = ({ id, enabled }: { id: string; enabled?: boolean }) => {
         return useQuery({
-            queryKey: [...SUBSCRIPTION_KEY, "get", id],
+            queryKey: [...SUBSCRIPTION_QUERY_KEY, "get", id],
             queryFn: async () => {
                 const res = await cFetch<FullSubscription>(
                     `/api/subscriptions/${id}`
@@ -331,7 +332,7 @@ export function useSubscription() {
 
     const useAnalytics = () => {
         return useQuery({
-            queryKey: ANALYTICS_KEY,
+            queryKey: SUBSCRIPTION_ANALYTICS_QUERY_KEY,
             queryFn: async () => {
                 const res = await cFetch<{
                     stats: SubscriptionStats;
@@ -360,7 +361,7 @@ export function useSubscription() {
         action?: SubscriptionActivityLog["action"];
     } = {}) => {
         return useQuery({
-            queryKey: [...ACTIVITY_KEY, page, limit, subscriptionId, action],
+            queryKey: [...SUBSCRIPTION_ACTIVITY_QUERY_KEY, page, limit, subscriptionId, action],
             queryFn: async () => {
                 const params = new URLSearchParams();
                 if (page) params.set("page", String(page));

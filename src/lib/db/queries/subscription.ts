@@ -1,9 +1,6 @@
-import { DEFAULT_PAGINATION } from "@/config/const";
-import {
-    getMonthlyCost,
-    getYearlyCost,
-    parseNumeric,
-} from "@/lib/subscription";
+import { DEFAULT_PAGINATION, SUBSCRIPTION_STATUSES } from "@/config/const";
+import { getMonthlyCost, getYearlyCost } from "@/lib/subscription";
+import { parseNumeric } from "@/lib/utils";
 import {
     BulkUpdateSubscription,
     CreateSubscription,
@@ -15,11 +12,7 @@ import {
 } from "@/lib/validations";
 import { and, eq, inArray, lt, lte } from "drizzle-orm";
 import { db } from "../client";
-import {
-    SUBSCRIPTION_STATUSES,
-    subscriptionReminderSends,
-    subscriptions,
-} from "../schemas";
+import { subscriptionReminderSends, subscriptions } from "../schemas";
 
 type SubStatus = (typeof SUBSCRIPTION_STATUSES)[number];
 
@@ -170,7 +163,6 @@ class SubscriptionQuery {
             with: { category: true, paymentSource: true },
         });
 
-        // Count separately so pagination math reflects the full filtered set.
         const allRows = await db.query.subscriptions.findMany({
             where,
             columns: { id: true },
@@ -296,10 +288,6 @@ class SubscriptionQuery {
             )
             .returning();
     }
-
-    // ------------------------------------------------------------------
-    // Cron / scheduled helpers
-    // ------------------------------------------------------------------
 
     async findDueForRenewal({ now = new Date() }: { now?: Date } = {}) {
         const data = await db
@@ -484,10 +472,6 @@ class SubscriptionQuery {
             .returning()
             .then((res) => res[0]);
     }
-
-    // ------------------------------------------------------------------
-    // Analytics
-    // ------------------------------------------------------------------
 
     async forAnalytics({
         userId,

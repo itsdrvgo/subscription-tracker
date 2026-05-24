@@ -25,21 +25,21 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
-    BILLING_CYCLE_LABELS,
+    BILLING_CYCLES,
     CURRENCIES,
+    PAYMENT_SOURCE_TYPES,
+    SUBSCRIPTION_KINDS,
+    SUBSCRIPTION_PRIORITIES,
+    SUBSCRIPTION_STATUSES,
+} from "@/config/const";
+import {
+    BILLING_CYCLE_LABELS,
     KIND_DESCRIPTIONS,
     KIND_LABELS,
     PAYMENT_SOURCE_TYPE_LABELS,
     PRIORITY_LABELS,
     STATUS_LABELS,
 } from "@/config/subscription";
-import {
-    BILLING_CYCLES,
-    PAYMENT_SOURCE_TYPES,
-    SUBSCRIPTION_KINDS,
-    SUBSCRIPTION_PRIORITIES,
-    SUBSCRIPTION_STATUSES,
-} from "@/lib/db/schemas";
 import {
     usePaymentSource,
     useSubscription,

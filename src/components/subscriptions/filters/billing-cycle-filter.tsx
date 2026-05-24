@@ -8,8 +8,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { BILLING_CYCLES } from "@/config/const";
 import { BILLING_CYCLE_LABELS } from "@/config/subscription";
-import { BILLING_CYCLES } from "@/lib/db/schemas";
 
 type Cycle = (typeof BILLING_CYCLES)[number];
 

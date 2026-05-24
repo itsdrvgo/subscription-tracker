@@ -1,71 +1,15 @@
+import {
+    ACTIVITY_ACTIONS,
+    BILLING_CYCLES,
+    PAYMENT_SOURCE_TYPES,
+    REMINDER_TYPES,
+    SUBSCRIPTION_KINDS,
+    SUBSCRIPTION_PRIORITIES,
+    SUBSCRIPTION_STATUSES,
+} from "@/config/const";
 import { index, pgTable, uniqueIndex } from "drizzle-orm/pg-core";
 import { timestamps } from "../helper";
 import { users } from "./user";
-
-export const BILLING_CYCLES = [
-    "weekly",
-    "monthly",
-    "quarterly",
-    "yearly",
-    "custom",
-] as const;
-
-export const SUBSCRIPTION_STATUSES = [
-    "active",
-    "inactive",
-    "cancelled",
-    "paused",
-    "trial",
-    "expired",
-    "pending",
-] as const;
-
-export const SUBSCRIPTION_PRIORITIES = ["low", "medium", "high"] as const;
-
-/**
- * Kind classifies a recurring debit so analytics can treat them differently:
- *   - subscription: standard recurring expense (Netflix, etc.)
- *   - emi: fixed-term loan repayment — an expense, but with a maturity date
- *   - savings: recurring deposit / PPF — money is debited monthly but returns
- *             at maturity, so it is excluded from monthly "spend" totals
- */
-export const SUBSCRIPTION_KINDS = ["subscription", "emi", "savings"] as const;
-
-export const PAYMENT_SOURCE_TYPES = [
-    "play_store",
-    "app_store",
-    "credit_card",
-    "upi_credit_card",
-    "debit_card",
-    "paypal",
-    "upi",
-    "bank",
-    "manual",
-    "custom",
-] as const;
-
-export const ACTIVITY_ACTIONS = [
-    "created",
-    "updated",
-    "deleted",
-    "renewed",
-    "cancelled",
-    "paused",
-    "resumed",
-    "trial_ended",
-    "reminder_sent",
-    "status_changed",
-    "price_changed",
-] as const;
-
-export const REMINDER_TYPES = [
-    "renewal",
-    "trial_ending",
-    "budget_warning",
-    "budget_critical",
-    "budget_exceeded",
-    "monthly_summary",
-] as const;
 
 export const subscriptionCategories = pgTable(
     "subscription_categories",

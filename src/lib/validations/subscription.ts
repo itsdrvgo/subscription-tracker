@@ -6,7 +6,7 @@ import {
     SUBSCRIPTION_KINDS,
     SUBSCRIPTION_PRIORITIES,
     SUBSCRIPTION_STATUSES,
-} from "@/lib/db/schemas";
+} from "@/config/const";
 import z from "zod";
 import { generateDateSchema, generateIdSchema } from "./general";
 
@@ -37,9 +37,6 @@ const tagsSchema = z
         return [];
     });
 
-// ---------------------------------------------------------------------------
-// Subscription Category
-// ---------------------------------------------------------------------------
 
 export const subscriptionCategorySchema = z.object({
     id: generateIdSchema({ isUUID: true }),
@@ -78,9 +75,6 @@ export type UpdateSubscriptionCategory = z.infer<
     typeof updateSubscriptionCategorySchema
 >;
 
-// ---------------------------------------------------------------------------
-// Payment Source
-// ---------------------------------------------------------------------------
 
 export const paymentSourceSchema = z.object({
     id: generateIdSchema({ isUUID: true }),
@@ -106,9 +100,6 @@ export type PaymentSource = z.infer<typeof paymentSourceSchema>;
 export type CreatePaymentSource = z.infer<typeof createPaymentSourceSchema>;
 export type UpdatePaymentSource = z.infer<typeof updatePaymentSourceSchema>;
 
-// ---------------------------------------------------------------------------
-// Budget
-// ---------------------------------------------------------------------------
 
 export const budgetSchema = z.object({
     id: generateIdSchema({ isUUID: true }),
@@ -154,9 +145,6 @@ export const upsertBudgetSchema = budgetSchema
 export type Budget = z.infer<typeof budgetSchema>;
 export type UpsertBudget = z.infer<typeof upsertBudgetSchema>;
 
-// ---------------------------------------------------------------------------
-// Subscription
-// ---------------------------------------------------------------------------
 
 export const subscriptionSchema = z.object({
     id: generateIdSchema({ isUUID: true }),
@@ -311,9 +299,6 @@ export const fullSubscriptionSchema = subscriptionSchema.extend({
 
 export type FullSubscription = z.infer<typeof fullSubscriptionSchema>;
 
-// ---------------------------------------------------------------------------
-// Activity Log
-// ---------------------------------------------------------------------------
 
 export const subscriptionActivityLogSchema = z.object({
     id: generateIdSchema({ isUUID: true }),
@@ -329,9 +314,6 @@ export type SubscriptionActivityLog = z.infer<
     typeof subscriptionActivityLogSchema
 >;
 
-// ---------------------------------------------------------------------------
-// Reminder Send Log
-// ---------------------------------------------------------------------------
 
 export const subscriptionReminderSendSchema = z.object({
     id: generateIdSchema({ isUUID: true }),
@@ -348,9 +330,6 @@ export type SubscriptionReminderSend = z.infer<
     typeof subscriptionReminderSendSchema
 >;
 
-// ---------------------------------------------------------------------------
-// Analytics
-// ---------------------------------------------------------------------------
 
 export const subscriptionStatsSchema = z.object({
     totalActive: z.number(),

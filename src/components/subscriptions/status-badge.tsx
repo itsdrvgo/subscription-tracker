@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
+import { SUBSCRIPTION_STATUSES } from "@/config/const";
 import { STATUS_LABELS, STATUS_VARIANTS } from "@/config/subscription";
-import { SUBSCRIPTION_STATUSES } from "@/lib/db/schemas";
 import { cn } from "@/lib/utils";
 
 type Status = (typeof SUBSCRIPTION_STATUSES)[number];
