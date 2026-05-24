@@ -155,7 +155,10 @@ function SideUser() {
                 className={cn(sidebarMenuButtonVariants({ size: "lg" }))}
             >
                 {user ? (
-                    <>
+                    <Link
+                        href="/profile"
+                        className="flex flex-1 items-center gap-2 overflow-hidden text-left"
+                    >
                         <Avatar className="size-8">
                             <AvatarImage
                                 src={DEFAULT_PFP_URL}
@@ -166,13 +169,13 @@ function SideUser() {
                             </AvatarFallback>
                         </Avatar>
 
-                        <div className="grid flex-1 text-left text-sm leading-tight">
+                        <div className="grid flex-1 text-sm leading-tight">
                             <span className="truncate font-semibold">
                                 {user.firstName} {user.lastName}
                             </span>
                             <span className="truncate text-xs">Admin</span>
                         </div>
-                    </>
+                    </Link>
                 ) : (
                     <>
                         <Skeleton className="size-8 rounded-full" />

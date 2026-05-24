@@ -25,7 +25,16 @@ import { CURRENCIES } from "@/config/const";
 import { useBudget } from "@/lib/rq";
 import { UpsertBudget, upsertBudgetSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
+
+const DEFAULT_BUDGET: UpsertBudget = {
+    monthlyLimit: null,
+    yearlyLimit: null,
+    warningThreshold: 80,
+    criticalThreshold: 95,
+    currency: "USD",
+};
 
 export function BudgetManager() {
     const { useGet, useUpsert, useDelete } = useBudget();
@@ -37,14 +46,19 @@ export function BudgetManager() {
         resolver: zodResolver(
             upsertBudgetSchema
         ) as unknown as Resolver<UpsertBudget>,
-        values: {
-            monthlyLimit: data?.monthlyLimit ?? null,
-            yearlyLimit: data?.yearlyLimit ?? null,
-            warningThreshold: data?.warningThreshold ?? 80,
-            criticalThreshold: data?.criticalThreshold ?? 95,
-            currency: data?.currency ?? "USD",
-        },
+        defaultValues: DEFAULT_BUDGET,
     });
+
+    useEffect(() => {
+        if (!data) return;
+        form.reset({
+            monthlyLimit: data.monthlyLimit ?? null,
+            yearlyLimit: data.yearlyLimit ?? null,
+            warningThreshold: data.warningThreshold,
+            criticalThreshold: data.criticalThreshold,
+            currency: data.currency,
+        });
+    }, [data, form]);
 
     const handleSubmit = async (values: UpsertBudget) => {
         await upsert(values);

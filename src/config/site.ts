@@ -65,5 +65,16 @@ export const siteConfig: SiteConfig = {
                 },
             ],
         },
+        {
+            title: "Account",
+            url: "/profile",
+            icon: "User",
+            items: [
+                {
+                    title: "Profile",
+                    url: "/profile",
+                },
+            ],
+        },
     ],
 };
