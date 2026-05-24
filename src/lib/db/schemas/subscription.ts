@@ -22,6 +22,15 @@ export const SUBSCRIPTION_STATUSES = [
 
 export const SUBSCRIPTION_PRIORITIES = ["low", "medium", "high"] as const;
 
+/**
+ * Kind classifies a recurring debit so analytics can treat them differently:
+ *   - subscription: standard recurring expense (Netflix, etc.)
+ *   - emi: fixed-term loan repayment — an expense, but with a maturity date
+ *   - savings: recurring deposit / PPF — money is debited monthly but returns
+ *             at maturity, so it is excluded from monthly "spend" totals
+ */
+export const SUBSCRIPTION_KINDS = ["subscription", "emi", "savings"] as const;
+
 export const PAYMENT_SOURCE_TYPES = [
     "play_store",
     "app_store",
@@ -149,6 +158,10 @@ export const subscriptions = pgTable(
         websiteUrl: t.text("website_url"),
         logoUrl: t.text("logo_url"),
         tags: t.jsonb("tags").$type<string[]>().notNull().default([]),
+        kind: t
+            .text("kind", { enum: SUBSCRIPTION_KINDS })
+            .notNull()
+            .default("subscription"),
         billingCycle: t
             .text("billing_cycle", { enum: BILLING_CYCLES })
             .notNull(),
@@ -167,6 +180,7 @@ export const subscriptions = pgTable(
             .default("0"),
         startDate: t.timestamp("start_date").notNull(),
         nextRenewalDate: t.timestamp("next_renewal_date").notNull(),
+        endDate: t.timestamp("end_date"),
         autoRenew: t.boolean("auto_renew").notNull().default(true),
         isTrial: t.boolean("is_trial").notNull().default(false),
         trialEndDate: t.timestamp("trial_end_date"),

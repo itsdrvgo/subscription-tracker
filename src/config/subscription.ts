@@ -1,6 +1,7 @@
 import {
     BILLING_CYCLES,
     PAYMENT_SOURCE_TYPES,
+    SUBSCRIPTION_KINDS,
     SUBSCRIPTION_PRIORITIES,
     SUBSCRIPTION_STATUSES,
 } from "@/lib/db/schemas";
@@ -40,6 +41,24 @@ export const STATUS_VARIANTS: Record<
     trial: "outline",
     expired: "destructive",
     pending: "outline",
+};
+
+export const KIND_LABELS: Record<
+    (typeof SUBSCRIPTION_KINDS)[number],
+    string
+> = {
+    subscription: "Subscription",
+    emi: "EMI",
+    savings: "Savings",
+};
+
+export const KIND_DESCRIPTIONS: Record<
+    (typeof SUBSCRIPTION_KINDS)[number],
+    string
+> = {
+    subscription: "Recurring expense like Netflix or Spotify.",
+    emi: "Fixed-term loan repayment — counts as spend until paid off.",
+    savings: "Recurring deposit (RD/PPF) — debited monthly, returned at maturity.",
 };
 
 export const PRIORITY_LABELS: Record<

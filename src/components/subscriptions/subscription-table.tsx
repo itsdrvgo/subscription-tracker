@@ -3,6 +3,7 @@
 
 import { DataTableSkeleton } from "@/components/globals/skeletons";
 import { Icons } from "@/components/icons";
+import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
     DataTable,
@@ -12,11 +13,11 @@ import {
     FieldMapping,
 } from "@/components/ui/data-table";
 import { DEFAULT_PAGINATION } from "@/config/const";
-import { BILLING_CYCLE_LABELS } from "@/config/subscription";
+import { BILLING_CYCLE_LABELS, KIND_LABELS } from "@/config/subscription";
 import { SUBSCRIPTION_STATUSES } from "@/lib/db/schemas";
 import { useSubscription } from "@/lib/rq";
 import { formatCurrency } from "@/lib/subscription";
-import { truncateText } from "@/lib/utils";
+import { cn, truncateText } from "@/lib/utils";
 import { FullSubscription, Subscription } from "@/lib/validations";
 import {
     ColumnDef,
@@ -76,32 +77,58 @@ const columns = (
     {
         accessorKey: "name",
         header: "Subscription",
-        cell: ({ row }) => (
-            <div className="flex min-w-0 items-center gap-3">
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">
-                    {row.original.logoUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                            src={row.original.logoUrl}
-                            alt={row.original.name}
-                            className="size-9 rounded-md object-cover"
-                        />
-                    ) : (
-                        <Icons.Receipt className="size-4 text-muted-foreground" />
-                    )}
+        cell: ({ row }) => {
+            const s = row.original;
+            return (
+                <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">
+                        {s.logoUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                                src={s.logoUrl}
+                                alt={s.name}
+                                className="size-9 rounded-md object-cover"
+                            />
+                        ) : (
+                            <Icons.Receipt className="size-4 text-muted-foreground" />
+                        )}
+                    </div>
+                    <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                            <p className="truncate text-sm font-medium">
+                                {s.name}
+                            </p>
+                            {s.isTrial && (
+                                <Badge
+                                    variant="outline"
+                                    className="border-blue-500/30 bg-blue-500/15 px-1.5 py-0 text-[10px] font-medium text-blue-300"
+                                >
+                                    Trial
+                                </Badge>
+                            )}
+                            {s.kind !== "subscription" && (
+                                <Badge
+                                    variant="outline"
+                                    className={cn(
+                                        "border px-1.5 py-0 text-[10px] font-medium",
+                                        s.kind === "emi"
+                                            ? "border-orange-500/30 bg-orange-500/15 text-orange-300"
+                                            : "border-emerald-500/30 bg-emerald-500/15 text-emerald-300"
+                                    )}
+                                >
+                                    {KIND_LABELS[s.kind]}
+                                </Badge>
+                            )}
+                        </div>
+                        {s.description && (
+                            <p className="truncate text-xs text-muted-foreground">
+                                {truncateText(s.description, 40)}
+                            </p>
+                        )}
+                    </div>
                 </div>
-                <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">
-                        {row.original.name}
-                    </p>
-                    {row.original.description && (
-                        <p className="truncate text-xs text-muted-foreground">
-                            {truncateText(row.original.description, 40)}
-                        </p>
-                    )}
-                </div>
-            </div>
-        ),
+            );
+        },
     },
     {
         accessorKey: "status",
@@ -156,17 +183,22 @@ const columns = (
     {
         accessorKey: "nextRenewalDate",
         header: "Next renewal",
-        cell: ({ row }) => (
-            <div className="text-sm">
-                <p className="tabular-nums">
-                    {format(
-                        new Date(row.original.nextRenewalDate),
-                        "MMM dd, yyyy"
+        cell: ({ row }) => {
+            const s = row.original;
+            return (
+                <div className="text-sm">
+                    <p className="tabular-nums">
+                        {format(new Date(s.nextRenewalDate), "MMM dd, yyyy")}
+                    </p>
+                    <RenewalCountdown date={s.nextRenewalDate} />
+                    {s.endDate && (
+                        <p className="text-xs text-muted-foreground">
+                            Ends {format(new Date(s.endDate), "MMM yyyy")}
+                        </p>
                     )}
-                </p>
-                <RenewalCountdown date={row.original.nextRenewalDate} />
-            </div>
-        ),
+                </div>
+            );
+        },
     },
     {
         id: "actions",

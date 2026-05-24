@@ -58,8 +58,22 @@ export function StatsCards({ stats, isLoading, currency }: PageProps) {
         },
     ];
 
+    // Only surface the savings card when it actually carries a value, so
+    // users without PPF/RD-style entries don't see a noisy zero.
+    if (stats && stats.monthlyCommittedSavings > 0) {
+        items.push({
+            label: "Committed savings",
+            value: formatCurrency(stats.monthlyCommittedSavings, currency, {
+                keepDecimals: false,
+            }),
+            sub: "Monthly debits returning at maturity",
+            icon: Icons.PiggyBank,
+            tone: "text-emerald-300",
+        });
+    }
+
     return (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
             {items.map((item) => {
                 const Icon = item.icon;
                 return (

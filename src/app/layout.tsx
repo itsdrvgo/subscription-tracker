@@ -4,7 +4,7 @@ import { ClientProvider } from "@/components/providers";
 import { siteConfig } from "@/config/site";
 import { cn, getAbsoluteURL } from "@/lib/utils";
 import { ThemeProvider } from "@wrksz/themes/next";
-import { interHeading, outfit } from "./font";
+import { outfitHeading, outfit } from "./font";
 
 export const viewport: Viewport = {
     themeColor: [
@@ -85,7 +85,7 @@ export default function RootLayout({
                 "antialiased",
                 "font-sans",
                 outfit.variable,
-                interHeading.variable
+                outfitHeading.variable
             )}
             suppressHydrationWarning
         >

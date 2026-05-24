@@ -3,6 +3,7 @@ import {
     BILLING_CYCLES,
     PAYMENT_SOURCE_TYPES,
     REMINDER_TYPES,
+    SUBSCRIPTION_KINDS,
     SUBSCRIPTION_PRIORITIES,
     SUBSCRIPTION_STATUSES,
 } from "@/lib/db/schemas";
@@ -175,6 +176,7 @@ export const subscriptionSchema = z.object({
         .optional()
         .transform((v) => (v === "" ? null : v)),
     tags: z.array(z.string()).default([]),
+    kind: z.enum(SUBSCRIPTION_KINDS, "Invalid kind").default("subscription"),
     billingCycle: z.enum(BILLING_CYCLES, "Invalid billing cycle"),
     customIntervalDays: z.coerce
         .number()
@@ -192,6 +194,13 @@ export const subscriptionSchema = z.object({
     nextRenewalDate: generateDateSchema({
         error: "Next renewal date is required",
     }),
+    endDate: z
+        .union([z.string(), z.date(), z.null()])
+        .optional()
+        .transform((v) => {
+            if (v === null || v === undefined || v === "") return null;
+            return new Date(v as string | Date);
+        }),
     autoRenew: z.boolean().default(true),
     isTrial: z.boolean().default(false),
     trialEndDate: z
@@ -351,6 +360,7 @@ export const subscriptionStatsSchema = z.object({
     monthlySpend: z.number(),
     yearlySpend: z.number(),
     yearlyProjection: z.number(),
+    monthlyCommittedSavings: z.number(),
     upcomingRenewals7Days: z.number(),
     upcomingRenewals30Days: z.number(),
     trialsEndingSoon: z.number(),

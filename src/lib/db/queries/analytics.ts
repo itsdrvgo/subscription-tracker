@@ -40,9 +40,18 @@ class AnalyticsQuery {
         const in7 = addDays(now, 7);
         const in30 = addDays(now, 30);
 
+        // A subscription stops counting once its endDate has passed (e.g. an
+        // EMI fully paid off, an RD that matured). Trials and active count.
         const active = subs.filter(
-            (s) => s.status === "active" || s.status === "trial"
+            (s) =>
+                (s.status === "active" || s.status === "trial") &&
+                (!s.endDate || s.endDate >= now)
         );
+
+        // Split active by kind: savings flow back to the user at maturity so
+        // they don't belong in "monthly spend" — we report them separately.
+        const spendable = active.filter((s) => s.kind !== "savings");
+        const savings = active.filter((s) => s.kind === "savings");
 
         const totalActive = subs.filter((s) => s.status === "active").length;
         const totalInactive = subs.filter(
@@ -56,7 +65,7 @@ class AnalyticsQuery {
         // Convert each subscription's native-currency monthly cost to the
         // budget/target currency so aggregates are comparable across currencies.
         const monthlyByActive = await Promise.all(
-            active.map(async (s) => ({
+            spendable.map(async (s) => ({
                 sub: s,
                 monthly: await convert(
                     computeMonthlyCostForSubscription(s, now),
@@ -78,6 +87,19 @@ class AnalyticsQuery {
             0
         );
 
+        const savingsMonthly = await Promise.all(
+            savings.map((s) =>
+                convert(
+                    computeMonthlyCostForSubscription(s, now),
+                    s.currency
+                )
+            )
+        );
+        const monthlyCommittedSavings = savingsMonthly.reduce(
+            (sum, n) => sum + n,
+            0
+        );
+
         const upcomingRenewals7Days = active.filter(
             (s) => s.nextRenewalDate >= now && s.nextRenewalDate <= in7
         ).length;
@@ -94,8 +116,8 @@ class AnalyticsQuery {
                 s.trialEndDate <= in7
         ).length;
 
-        const averageSubscriptionCost = active.length
-            ? monthlySpend / active.length
+        const averageSubscriptionCost = spendable.length
+            ? monthlySpend / spendable.length
             : 0;
 
         const highestCostSubscription = monthlyByActive.length
@@ -178,11 +200,19 @@ class AnalyticsQuery {
                 const startedBeforeEnd = s.startDate <= end;
                 const stillActiveInMonth =
                     !s.cancelledAt || s.cancelledAt >= start;
+                const notYetEnded = !s.endDate || s.endDate >= start;
                 const validStatus =
                     s.status !== "expired" &&
                     s.status !== "pending" &&
                     s.status !== "inactive";
-                return startedBeforeEnd && stillActiveInMonth && validStatus;
+                const isSpendable = s.kind !== "savings";
+                return (
+                    startedBeforeEnd &&
+                    stillActiveInMonth &&
+                    notYetEnded &&
+                    validStatus &&
+                    isSpendable
+                );
             });
             const converted = await Promise.all(
                 eligible.map((s) =>
@@ -249,6 +279,7 @@ class AnalyticsQuery {
             monthlySpend,
             yearlySpend,
             yearlyProjection: yearlySpend,
+            monthlyCommittedSavings,
             upcomingRenewals7Days,
             upcomingRenewals30Days,
             trialsEndingSoon,
@@ -279,7 +310,8 @@ class AnalyticsQuery {
                 (s) =>
                     (s.status === "active" || s.status === "trial") &&
                     s.nextRenewalDate >= now &&
-                    s.nextRenewalDate <= in30
+                    s.nextRenewalDate <= in30 &&
+                    (!s.endDate || s.endDate >= now)
             )
             .sort(
                 (a, b) =>

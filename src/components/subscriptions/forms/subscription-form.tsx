@@ -27,6 +27,8 @@ import { Textarea } from "@/components/ui/textarea";
 import {
     BILLING_CYCLE_LABELS,
     CURRENCIES,
+    KIND_DESCRIPTIONS,
+    KIND_LABELS,
     PAYMENT_SOURCE_TYPE_LABELS,
     PRIORITY_LABELS,
     STATUS_LABELS,
@@ -34,6 +36,7 @@ import {
 import {
     BILLING_CYCLES,
     PAYMENT_SOURCE_TYPES,
+    SUBSCRIPTION_KINDS,
     SUBSCRIPTION_PRIORITIES,
     SUBSCRIPTION_STATUSES,
 } from "@/lib/db/schemas";
@@ -121,6 +124,7 @@ export function SubscriptionForm({ data }: PageProps) {
             categoryId: data?.categoryId ?? null,
             paymentSourceId: data?.paymentSourceId ?? null,
             tags: data?.tags ?? [],
+            kind: data?.kind ?? "subscription",
             billingCycle: data?.billingCycle ?? "monthly",
             customIntervalDays: data?.customIntervalDays ?? null,
             price: data?.price ?? "0",
@@ -131,6 +135,7 @@ export function SubscriptionForm({ data }: PageProps) {
             discountAmount: data?.discountAmount ?? "0",
             startDate: defaultStart,
             nextRenewalDate: defaultNext,
+            endDate: data?.endDate ?? null,
             autoRenew: data?.autoRenew ?? true,
             isTrial: data?.isTrial ?? false,
             trialEndDate: data?.trialEndDate ?? null,
@@ -392,6 +397,41 @@ function BillingCard({
                 <CardTitle>Billing</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+                <FormField
+                    control={form.control}
+                    name="kind"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Kind</FormLabel>
+                            <Select
+                                onValueChange={field.onChange}
+                                value={field.value ?? "subscription"}
+                                disabled={isSubmitting}
+                            >
+                                <FormControl>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {SUBSCRIPTION_KINDS.map((k) => (
+                                        <SelectItem key={k} value={k}>
+                                            {KIND_LABELS[k]}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <FormDescription>
+                                {KIND_DESCRIPTIONS[
+                                    (field.value ??
+                                        "subscription") as keyof typeof KIND_DESCRIPTIONS
+                                ]}
+                            </FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
                 <div className="grid items-start gap-4 sm:grid-cols-3">
                     <FormField
                         control={form.control}
@@ -655,6 +695,29 @@ function RenewalCard({
                         )}
                     />
                 </div>
+
+                <FormField
+                    control={form.control}
+                    name="endDate"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                            <FormLabel>End date (optional)</FormLabel>
+                            <FormControl>
+                                <DatePicker
+                                    disabled={isSubmitting}
+                                    value={field.value}
+                                    onChange={(d) => field.onChange(d ?? null)}
+                                />
+                            </FormControl>
+                            <FormDescription>
+                                Maturity / completion date for fixed-term
+                                commitments like EMIs, RDs, or PPF. Leave blank
+                                for open-ended subscriptions.
+                            </FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
 
                 <FormField
                     control={form.control}
