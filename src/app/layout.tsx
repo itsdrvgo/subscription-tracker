@@ -4,7 +4,7 @@ import { ClientProvider } from "@/components/providers";
 import { siteConfig } from "@/config/site";
 import { cn, getAbsoluteURL } from "@/lib/utils";
 import { ThemeProvider } from "@wrksz/themes/next";
-import { outfitHeading, outfit } from "./font";
+import { outfit, outfitHeading } from "./font";
 
 export const viewport: Viewport = {
     themeColor: [
@@ -61,14 +61,14 @@ export const metadata: Metadata = {
                 type: "image/x-icon",
             },
             {
-                url: "/favicon-96x96.png",
+                url: "/icon1.png",
                 sizes: "96x96",
                 type: "image/png",
             },
         ],
-        apple: "/apple-touch-icon.png",
+        apple: "/apple-icon.png",
     },
-    manifest: "/site.webmanifest",
+    manifest: "/manifest.json",
     metadataBase: new URL(getAbsoluteURL()),
 };
 
