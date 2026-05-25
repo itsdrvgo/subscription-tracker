@@ -173,7 +173,7 @@ export function PrimaryButton({
     children: ReactNode;
 }) {
     return (
-        <Section style={{ padding: "0 32px 32px 0" }}>
+        <Section style={{ padding: "0 32px 32px 0", marginTop: 24 }}>
             <a
                 href={href}
                 style={{
