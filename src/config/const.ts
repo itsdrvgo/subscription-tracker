@@ -116,7 +116,9 @@ export const RATE_LIMITS = {
 
 export const BUDGET_QUERY_KEY = ["budget"] as const;
 export const PAYMENT_SOURCE_QUERY_KEY = ["payment-source"] as const;
-export const SUBSCRIPTION_CATEGORY_QUERY_KEY = ["subscription-category"] as const;
+export const SUBSCRIPTION_CATEGORY_QUERY_KEY = [
+    "subscription-category",
+] as const;
 export const SUBSCRIPTION_QUERY_KEY = ["subscription"] as const;
 export const SUBSCRIPTION_ANALYTICS_QUERY_KEY = [
     "subscription",
@@ -128,3 +130,6 @@ export const SUBSCRIPTION_ACTIVITY_QUERY_KEY = [
 ] as const;
 
 export type RateLimitPreset = (typeof RATE_LIMITS)[keyof typeof RATE_LIMITS];
+
+export const APP_TIME_ZONE = "Asia/Kolkata";
+export const MS_PER_DAY = 1000 * 60 * 60 * 24;

@@ -1,4 +1,4 @@
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatLongDate } from "@/lib/utils";
 import { FullSubscription } from "@/lib/validations";
 import { render, Text } from "react-email";
 import { DetailsTable, EmailLayout, PrimaryButton } from "./layout";
@@ -54,14 +54,10 @@ export function TrialEndingEmail({
                     },
                     {
                         label: "Trial ends",
-                        value: (
+                        value: formatLongDate(
                             subscription.trialEndDate ??
-                            subscription.nextRenewalDate
-                        ).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                        }),
+                                subscription.nextRenewalDate
+                        ),
                     },
                 ]}
             />

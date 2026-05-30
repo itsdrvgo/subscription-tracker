@@ -1,5 +1,5 @@
 import { BILLING_CYCLE_LABELS } from "@/config/subscription";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatLongDate } from "@/lib/utils";
 import { FullSubscription } from "@/lib/validations";
 import { render, Text } from "react-email";
 import { DetailsTable, EmailLayout, PrimaryButton } from "./layout";
@@ -61,14 +61,7 @@ export function RenewalReminderEmail({
                     },
                     {
                         label: "Renewal date",
-                        value: subscription.nextRenewalDate.toLocaleDateString(
-                            "en-US",
-                            {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                            }
-                        ),
+                        value: formatLongDate(subscription.nextRenewalDate),
                     },
                     ...(subscription.paymentSource
                         ? [

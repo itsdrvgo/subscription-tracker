@@ -1,4 +1,4 @@
-import { MESSAGES } from "@/config/const";
+import { APP_TIME_ZONE, MESSAGES, MS_PER_DAY } from "@/config/const";
 import { CURRENCY_SYMBOLS } from "@/config/subscription";
 import { clsx, type ClassValue } from "clsx";
 import { NextResponse } from "next/server";
@@ -405,20 +405,51 @@ export function parseNumeric(
     return Number.isFinite(n) ? n : 0;
 }
 
-export function startOfDay(date: Date = new Date()): Date {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    return d;
+function zonedParts(date: Date, timeZone: string) {
+    const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+    }).formatToParts(date);
+    const get = (type: string) =>
+        Number(parts.find((p) => p.type === type)?.value ?? 0);
+    return {
+        hour: get("hour") % 24,
+        minute: get("minute"),
+        second: get("second"),
+    };
 }
 
-export function endOfDay(date: Date = new Date()): Date {
-    const d = new Date(date);
-    d.setHours(23, 59, 59, 999);
-    return d;
+export function startOfDay(
+    date: Date = new Date(),
+    timeZone: string = APP_TIME_ZONE
+): Date {
+    const { hour, minute, second } = zonedParts(date, timeZone);
+    const sinceMidnight =
+        ((hour * 60 + minute) * 60 + second) * 1000 + date.getMilliseconds();
+    return new Date(date.getTime() - sinceMidnight);
+}
+
+export function endOfDay(
+    date: Date = new Date(),
+    timeZone: string = APP_TIME_ZONE
+): Date {
+    return new Date(startOfDay(date, timeZone).getTime() + MS_PER_DAY - 1);
 }
 
 export function daysUntil(date: Date, from: Date = new Date()): number {
-    const a = startOfDay(date);
-    const b = startOfDay(from);
-    return Math.round((a.getTime() - b.getTime()) / (1000 * 60 * 60 * 24));
+    const a = startOfDay(date).getTime();
+    const b = startOfDay(from).getTime();
+    return Math.round((a - b) / MS_PER_DAY);
+}
+
+export function formatLongDate(date: Date): string {
+    return date.toLocaleDateString("en-US", {
+        timeZone: APP_TIME_ZONE,
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
 }
