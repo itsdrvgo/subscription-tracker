@@ -70,8 +70,6 @@ export function getNextRenewalDate(params: {
     return next;
 }
 
-// Cron uses this to catch up renewals that lapsed across multiple cycles
-// while the worker was offline. Guard prevents runaway loops on bad data.
 export function rollRenewalForward(params: {
     from: Date;
     billingCycle: BillingCycle;

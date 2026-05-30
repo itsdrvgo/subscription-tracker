@@ -407,8 +407,6 @@ export async function runRenewalCron({
         errors: [],
     };
 
-    // Order matters: send reminders before rolling renewals so the user
-    // gets notified about the upcoming charge even on the day-of run.
     await sendRenewalReminders(report, now);
     await sendTrialEndingReminders(report, now);
     await sendBudgetAlerts(report, now);
