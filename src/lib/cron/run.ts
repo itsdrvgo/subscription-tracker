@@ -1,9 +1,5 @@
 import { db } from "@/lib/db/client";
 import { queries } from "@/lib/db/queries";
-import {
-    computeMonthlyCostForSubscription,
-    computeYearlyCostForSubscription,
-} from "@/lib/db/queries/subscription";
 import { subscriptions } from "@/lib/db/schemas";
 import {
     budgetAlertEmail,
@@ -12,13 +8,8 @@ import {
     trialEndingEmail,
 } from "@/lib/email";
 import { rollRenewalForward } from "@/lib/subscription";
-import {
-    daysUntil,
-    getAbsoluteURL,
-    parseNumeric,
-    startOfDay,
-} from "@/lib/utils";
-import { FullSubscription, SafeUser } from "@/lib/validations";
+import { daysUntil, getAbsoluteURL, startOfDay } from "@/lib/utils";
+import { SafeUser } from "@/lib/validations";
 import { addDays } from "date-fns";
 import { eq } from "drizzle-orm";
 
@@ -271,25 +262,11 @@ async function sendBudgetAlerts(report: CronReport, now: Date) {
             const user = userMap.get(b.userId);
             if (!user) continue;
 
-            const subs = (await queries.subscription.forAnalytics({
+            const stats = await queries.analytics.getStats({
                 userId: b.userId,
-            })) as FullSubscription[];
-
-            const active = subs.filter(
-                (s) => s.status === "active" || s.status === "trial"
-            );
-
-            const monthly = active.reduce(
-                (sum, s) => sum + computeMonthlyCostForSubscription(s),
-                0
-            );
-            const yearly = active.reduce(
-                (sum, s) => sum + computeYearlyCostForSubscription(s),
-                0
-            );
-
-            const monthlyLimit = parseNumeric(b.monthlyLimit);
-            const yearlyLimit = parseNumeric(b.yearlyLimit);
+            });
+            const usage = stats.budget;
+            if (!usage) continue;
 
             const checks: {
                 period: "monthly" | "yearly";
@@ -298,20 +275,28 @@ async function sendBudgetAlerts(report: CronReport, now: Date) {
                 percent: number;
             }[] = [];
 
-            if (monthlyLimit > 0)
+            if (usage.monthlyLimit && usage.monthlyLimit > 0)
                 checks.push({
                     period: "monthly",
-                    limit: monthlyLimit,
-                    usage: monthly,
-                    percent: (monthly / monthlyLimit) * 100,
+                    limit: usage.monthlyLimit,
+                    usage: usage.monthlyUsage,
+                    percent: usage.monthlyPercent,
                 });
-            if (yearlyLimit > 0)
+            if (usage.yearlyLimit && usage.yearlyLimit > 0)
                 checks.push({
                     period: "yearly",
-                    limit: yearlyLimit,
-                    usage: yearly,
-                    percent: (yearly / yearlyLimit) * 100,
+                    limit: usage.yearlyLimit,
+                    usage: usage.yearlyUsage,
+                    percent: usage.yearlyPercent,
                 });
+
+            // Sentinel subscription id for the reminder-dedup key (see below).
+            const userSubs = await queries.subscription.forAnalytics({
+                userId: b.userId,
+            });
+            const sentinelSubscriptionId = userSubs.find(
+                (s) => s.status === "active" || s.status === "trial"
+            )?.id;
 
             for (const check of checks) {
                 const severity: "warning" | "critical" | "exceeded" | null =
@@ -343,7 +328,6 @@ async function sendBudgetAlerts(report: CronReport, now: Date) {
                 // unique index on (subscription_id, reminder_type, for_date)
                 // and budget alerts have no subscription, we use a sentinel
                 // subscription id derived from the budget. Skip if no subs.
-                const sentinelSubscriptionId = active[0]?.id;
                 if (!sentinelSubscriptionId) continue;
 
                 const already = await queries.subscription.hasReminderBeenSent({
